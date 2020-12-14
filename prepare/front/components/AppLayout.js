@@ -7,20 +7,29 @@ import PropTypes from 'prop-types';
 // 리액트 라우터는 Next안에서 안쓰이고 Next 자체에 라우터가 존재함
 import Link from 'next/Link';
 
+// antd 가져다 쓰면된다.
+import { Menu, Input, Row, Col } from 'antd';
+
 const AppLatout = ({ children }) => {
     return(
         <div>
-            <div>공통메뉴</div>
-            <div>
-                {/* 
-                    1. href를 Link 컴포넌트에 넣어야함
-                    2. a 태그 추가해야함
-                    3. 코드 변경 시 자동 빌드가 되는 것은 react-holoader의 기능도 Next가 하기때문..
-                */}
-                <Link href="/"><a>노드버드</a></Link>
-                <Link href="/profile"><a>프로필</a></Link>
-                <Link href="/signup"><a>회원가입</a></Link>
-            </div>
+            {/* antd menu 레이아웃 추가 */}
+            <Menu mode="horizontal">
+                <Menu.Item>
+                    <Link href="/"><a>노드버드</a></Link>
+                </Menu.Item>                
+                <Menu.Item>
+                    <Link href="/profile"><a>프로필</a></Link>
+                </Menu.Item>
+                <Menu.Item>
+                    <Input.Search 
+                        enterButton 
+                        style={{ verticalAlign: 'middle' }} />
+                </Menu.Item>
+                <Menu.Item>
+                    <Link href="/signup"><a>회원가입</a></Link>
+                </Menu.Item>
+            </Menu>
             {children}
         </div>
     )

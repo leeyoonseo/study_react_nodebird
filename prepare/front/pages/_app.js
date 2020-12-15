@@ -4,11 +4,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import 'antd/dist/antd.css';
 
+// Redux
+import wrapper from '../store/configureStore';
 
 // <head></head>를 수정하고 싶다면 head 컴포넌트를 통해
 // 수정해야한다.
 import Head from 'next/head';
 
+// next@6 이상부터 provider로 감싸주지 않아도 됨
 const NodeBird = ({ Component }) => {
     return(
         <>
@@ -26,4 +29,5 @@ NodeBird.protoTypes = {
     Component: PropTypes.elementType.isRequired,
 }
 
-export default NodeBird;
+// wrapper.withRedux()에 hoc로 사용하면됨.
+export default wrapper.withRedux(NodeBird);

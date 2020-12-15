@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 // 리액트 라우터는 Next안에서 안쓰이고 Next 자체에 라우터가 존재함
-import Link from 'next/Link';
+import Link from 'next/link';
 
 // antd 가져다 쓰면된다.
 import { Menu, Input, Row, Col } from 'antd';
@@ -83,7 +83,6 @@ const AppLatout = ({ children }) => {
                     </a>
                 </Col>
             </Row>
-            {children}
         </div>
     )
 }

@@ -1,5 +1,6 @@
 // useMemo를 통해 styled 처리
 import React, { useState, useCallback, useMemo } from 'react';
+import useInput from '../hooks/useInput';
 import Link from 'next/link';
 import { Form, Input, Button } from 'antd';
 import styled from 'styled-components';
@@ -15,21 +16,9 @@ const FormWrapper = styled(Form)`
 // 수작업으로 만들어도되나 라이브러리로 만드는 것도 좋음
 // 하지만 실무에서는 폼 라이브러리 추천
 const LoginForm = ({ setIsLoggedIn }) => {
-    const [id, setId] = useState('');
-    const [password, setPassword] = useState('');
-
-    // 컴포넌트의 props로 넘겨주는 함수는 useCallback을 꼭 써야
-    // 최적화가 된다.
-    // 이렇게 똑같이 반복작업이 많기에 라이브러리 추천..
-    const onChangeId = useCallback((e) => {
-        setId(e.target.value);
-    }, []);
-
-    // 패턴이 비슷한데 조금씩 다른것을 처리하는 방법은 추후
-    // 커스텀 훅으로 처리할 수 있다! 
-    const onChangePassword = useCallback((e) => {
-        setPassword(e.target.value);
-    }, []);
+    // 커스텀훅 추가함으로써 기존 코드들 삭제
+    const [id, onChangeId] = useInput('');
+    const [password, onChangePassword] = useInput('');
 
     // 리렌더링되도 style 함수는 useMemo로 인해 캐싱되어있다.
     const styleFunc = useMemo(() => ({ marginTop: 10}), []);

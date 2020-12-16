@@ -20,13 +20,23 @@ import styled from 'styled-components';
 import UserProfile from '../components/UserProfile';
 import LoginForm from '../components/LoginForm';
 
+// store 호출하기 위해 필요
+// react-redux는 react와 redux를 연결해주는 라이브러리
+import { useSelector } from 'react-redux';
+
 // 다른 컴포넌트를 커스텀하려고 하면 styled에 넣어서 넘겨준다.
-const SearchInput = styled(Input.Search)`
-    vertical-align: middle;
-`;
+// const SearchInput = styled(Input.Search)`
+//     vertical-align: middle;
+// `;
 
 const AppLatout = ({ children }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // store가 생겼으므로 아래 코드는 불필요해졌다.
+    // const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // store 사용
+    const isLoggedIn = useSelector((state) => {
+        console.log(state)
+        // state.user.isLoggedIn
+    });
 
     return(
         <div>
@@ -51,7 +61,7 @@ const AppLatout = ({ children }) => {
                         useCallback은 함수를 캐싱
                         useMemo는 값을 캐싱
                     */}
-                    <SearchInput
+                    <Input.Search
                         enterButton 
                         style={{ verticalAlign: 'middle' }} />
                 </Menu.Item>
@@ -71,7 +81,7 @@ const AppLatout = ({ children }) => {
                     md 25%                
                 */}
                 <Col xs={24} md={6}>
-                    {isLoggedIn ? <UserProfile setIsLoggedIn={setIsLoggedIn} /> : <LoginForm setIsLoggedIn={setIsLoggedIn} />}
+                    {isLoggedIn ? <UserProfile /> : <LoginForm />}
                 </Col>
                 <Col xs={24} md={12}>
                     {children}

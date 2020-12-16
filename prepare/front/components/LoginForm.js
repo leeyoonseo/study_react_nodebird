@@ -1,9 +1,13 @@
 // useMemo를 통해 styled 처리
 import React, { useState, useCallback, useMemo } from 'react';
-import useInput from '../hooks/useInput';
 import Link from 'next/link';
 import { Form, Input, Button } from 'antd';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
+
+import useInput from '../hooks/useInput';
+// action creator 가져오기
+import { loginAction } from '../reducers';
 
 const ButtonWrapper = styled.div`
     margin-top:10px;
@@ -15,7 +19,10 @@ const FormWrapper = styled(Form)`
 
 // 수작업으로 만들어도되나 라이브러리로 만드는 것도 좋음
 // 하지만 실무에서는 폼 라이브러리 추천
-const LoginForm = ({ setIsLoggedIn }) => {
+const LoginForm = () => {
+    // dispatch 추가
+    const dispatch = useDispatch();
+
     // 커스텀훅 추가함으로써 기존 코드들 삭제
     const [id, onChangeId] = useInput('');
     const [password, onChangePassword] = useInput('');
@@ -28,7 +35,9 @@ const LoginForm = ({ setIsLoggedIn }) => {
         // onFinish에 적용이되어있기 때문에
         // e.preventDefault();
         console.log(id, password);
-        setIsLoggedIn(true);
+
+        // dispatch 추가
+        dispatch(loginAction(id, password));
     }, [id, password]);
 
     return(

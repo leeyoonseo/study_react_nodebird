@@ -9,7 +9,7 @@ import AppLatout from "../components/AppLayout";
 const Home = () => {
     return(
         <AppLatout>
-            {/* <div>Hello, Next!</div> */}
+            <div>index</div>
         </AppLatout>
     );
 }

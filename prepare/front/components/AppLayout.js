@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import styled from 'styled-components';
 
 // js 작업 시에 props 체크... typescript일 경우 필요없다.
 // prop으로 넘기는 애들을 prop-types로 체크
@@ -9,8 +10,6 @@ import Link from 'next/link';
 
 // antd 가져다 쓰면된다.
 import { Menu, Input, Row, Col } from 'antd';
-
-import styled from 'styled-components';
 
 // 컴포넌트(순수하게 화면보여주는거)
 // 리액트에서 클래스일때 컴포넌트, 컨테이너 나누어 작업을 추천했었다.
@@ -25,17 +24,17 @@ import LoginForm from '../components/LoginForm';
 import { useSelector } from 'react-redux';
 
 // 다른 컴포넌트를 커스텀하려고 하면 styled에 넣어서 넘겨준다.
-// const SearchInput = styled(Input.Search)`
-//     vertical-align: middle;
-// `;
+// 해당 className 관련 콘솔에러는 추후 강의에서 해결한다고 함.
+const InputSearch = styled(Input.Search)`
+    vertical-align: middle;
+`;
 
 const AppLatout = ({ children }) => {
     // store가 생겼으므로 아래 코드는 불필요해졌다.
     // const [isLoggedIn, setIsLoggedIn] = useState(false);
     // store 사용
     const isLoggedIn = useSelector((state) => {
-        console.log(state)
-        // state.user.isLoggedIn
+        state.user.isLoggedIn
     });
 
     return(
@@ -49,21 +48,7 @@ const AppLatout = ({ children }) => {
                     <Link href="/profile"><a>프로필</a></Link>
                 </Menu.Item>
                 <Menu.Item>
-                    {/* 
-                        {} === {} false기 때문에 매번 리렌더링한다.
-                        성능에 큰 이슈가 없다면 집착할 필요는 없는데,
-                        영향이 있기는 한것을 알고 있어야한다
-                        antd의 컴포넌트는 어떻게 styled-components를 적용할까?
-                        커스텀하게 바꿀수있다.
-                    */}
-                    {/* 
-                        만약 styled-components가 싫으면 useMemo를 통해 해결하자
-                        useCallback은 함수를 캐싱
-                        useMemo는 값을 캐싱
-                    */}
-                    <Input.Search
-                        enterButton 
-                        style={{ verticalAlign: 'middle' }} />
+                    <InputSearch enterButton />
                 </Menu.Item>
                 <Menu.Item>
                     <Link href="/signup"><a>회원가입</a></Link>

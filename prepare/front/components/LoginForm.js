@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 
 import useInput from '../hooks/useInput';
 // action creator 가져오기
-import { loginAction } from '../reducers';
+import { loginAction } from '../reducers/user';
 
 const ButtonWrapper = styled.div`
     margin-top:10px;
@@ -17,26 +17,20 @@ const FormWrapper = styled(Form)`
     padding: 10px;
 `;
 
-// 수작업으로 만들어도되나 라이브러리로 만드는 것도 좋음
-// 하지만 실무에서는 폼 라이브러리 추천
 const LoginForm = () => {
-    // dispatch 추가
     const dispatch = useDispatch();
 
-    // 커스텀훅 추가함으로써 기존 코드들 삭제
+    // 커스텀 훅 추가함으로써 기존 코드들 삭제
     const [id, onChangeId] = useInput('');
     const [password, onChangePassword] = useInput('');
 
     // 리렌더링되도 style 함수는 useMemo로 인해 캐싱되어있다.
-    const styleFunc = useMemo(() => ({ marginTop: 10}), []);
-
+    // const styleFunc = useMemo(() => ({ marginTop: 10}), []);
     const onSubmitForm = useCallback(() => {
         // antd에 e.preventdefault넣으면안됨
         // onFinish에 적용이되어있기 때문에
         // e.preventDefault();
         console.log(id, password);
-
-        // dispatch 추가
         dispatch(loginAction(id, password));
     }, [id, password]);
 

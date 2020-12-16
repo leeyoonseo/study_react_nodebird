@@ -30,12 +30,11 @@ const InputSearch = styled(Input.Search)`
 `;
 
 const AppLatout = ({ children }) => {
-    // store가 생겼으므로 아래 코드는 불필요해졌다.
-    // const [isLoggedIn, setIsLoggedIn] = useState(false);
-    // store 사용
-    const isLoggedIn = useSelector((state) => {
-        state.user.isLoggedIn
-    });
+
+    // 정확하게 꺼내쓰는 법
+    // const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+    // 한단계 더 들어가 쓰는 법, 구조분해. (위 아래는 취향차이, 성능은 미미)
+    const { isLoggedIn } = useSelector((state) => state.user);
 
     return(
         <div>

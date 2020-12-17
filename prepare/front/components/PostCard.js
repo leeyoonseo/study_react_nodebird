@@ -6,6 +6,7 @@ import { RetweetOutlined, HeartOutlined, HeartTwoTone, MessageOutlined, Ellipsis
 
 import CommentForm from './CommentForm';
 import PostImages from './PostImages';
+import PostCardContent from './PostCardContent';
 
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
@@ -70,7 +71,7 @@ const PostCard = ({ post }) => {
                 <Card.Meta
                     avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
                     title={post.User.nickname}
-                    description={post.content}
+                    description={<PostCardContent postData={post.content} />}
                 />
             </Card>
 
@@ -93,8 +94,6 @@ const PostCard = ({ post }) => {
                     />
                 </div>
             )}
-            {/* 
-            <Comments /> */}
         </div>
     );
 };

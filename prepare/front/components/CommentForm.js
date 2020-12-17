@@ -12,13 +12,19 @@ const CommentForm = ({ post }) => {
     }, [commentText]);
 
     return(
-        <Form onFinish={onSubmitComment}>
+        <Form 
+            onFinish={onSubmitComment}
+            style={{ position: 'relative', margin: 0 }} 
+        >
             <Input.TextArea 
                 value={commentText}
                 onChange={onChangeCommentText}
                 rows={4}
             />
-            <Button type="primary" htmlType="submit">
+            <Button
+                type="primary" 
+                style={{ zIndex: 1, position: 'absolute', right: 0, bottom: -40 }} 
+                htmlType="submit">
                 삐약
             </Button>
         </Form>

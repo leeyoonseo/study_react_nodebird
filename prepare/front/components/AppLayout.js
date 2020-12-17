@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 // js 작업 시에 props 체크... typescript일 경우 필요없다.
 // prop으로 넘기는 애들을 prop-types로 체크
@@ -23,6 +23,22 @@ import LoginForm from '../components/LoginForm';
 // react-redux는 react와 redux를 연결해주는 라이브러리
 import { useSelector } from 'react-redux';
 
+// gutter로 생기는 스크롤 버그 해결방법
+const Global = createGlobalStyle`
+    .ant-row{
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    .ant-col:first-child{
+        padding-left: 0 !important;
+    }
+
+    .ant-col:last-child{
+        padding-right: 0 !important;
+    }
+`;
+
 // 다른 컴포넌트를 커스텀하려고 하면 styled에 넣어서 넘겨준다.
 // 해당 className 관련 콘솔에러는 추후 강의에서 해결한다고 함.
 const InputSearch = styled(Input.Search)`
@@ -38,6 +54,8 @@ const AppLatout = ({ children }) => {
 
     return(
         <div>
+            <Global />
+            
             {/* antd menu 레이아웃 추가 */}
             <Menu mode="horizontal">
                 <Menu.Item>
@@ -56,7 +74,9 @@ const AppLatout = ({ children }) => {
 
             {/* tip 모바일 디자인을 먼저, 테블릿->데탑까지해야 쉽다. */}
 
-            {/* 컬럼간의 간격을 gutter */}
+            {/* 컬럼간의 간격을 gutter 
+                이것때문에 antd 버그가 발생하는데, (가로 스크롤 생기는것..)
+            */}
             <Row gutter={8}>
                 {/* 
                     반응형 컬럼 https://ant.design/components/grid/#header

@@ -17,7 +17,7 @@ import rootSaga from '../sagas';
 
 // redux-saga 사용하기
 // next랑 연결하기 위해 next-redux-saga
-import createSagaMiddleware from 'next-redux-saga';
+import createSagaMiddleware from 'redux-saga';
 
 // redux-thunk 커스텀 예시
 const loggerMiddleware = ({ dispatch, getState }) => (next) => (action) => {
@@ -50,7 +50,7 @@ const configureStore = () => {
     
     // redux-saga
     // rootSagas는 작성해야하는게 있음
-    store.sagaTask = sagaMiddleware.runc(rootSaga);
+    store.sagaTask = sagaMiddleware.run(rootSaga);
 
     return store;
 };

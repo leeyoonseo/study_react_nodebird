@@ -1,13 +1,14 @@
 // useMemo를 통해 styled 처리
 import React, { useState, useCallback, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import useInput from '../hooks/useInput';
+
 import Link from 'next/link';
 import { Form, Input, Button } from 'antd';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 
-import useInput from '../hooks/useInput';
 // action creator 가져오기
-import { loginAction } from '../reducers/user';
+import { loginRequestAction } from '../reducers/user';
 
 const ButtonWrapper = styled.div`
     margin-top:10px;
@@ -23,7 +24,7 @@ const LoginForm = () => {
     // 커스텀 훅 추가함으로써 기존 코드들 삭제
     const [id, onChangeId] = useInput('');
     const [password, onChangePassword] = useInput('');
-
+    const { isLoggingIn } = useSelector((state) => state.user);
     // 리렌더링되도 style 함수는 useMemo로 인해 캐싱되어있다.
     // const styleFunc = useMemo(() => ({ marginTop: 10}), []);
     const onSubmitForm = useCallback(() => {
@@ -31,7 +32,7 @@ const LoginForm = () => {
         // onFinish에 적용이되어있기 때문에
         // e.preventDefault();
         console.log(id, password);
-        dispatch(loginAction(id, password));
+        dispatch(loginRequestAction(id, password));
     }, [id, password]);
 
     return(
@@ -76,7 +77,11 @@ const LoginForm = () => {
             */}
             <ButtonWrapper>
                 
-                <Button type="primary" htmlType="submit" loading={false}>
+                <Button 
+                    type="primary" 
+                    htmlType="submit" 
+                    loading={isLoggingIn}
+                >
                     로그인
                 </Button>
                 <Link href="/signup">

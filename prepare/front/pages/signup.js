@@ -1,20 +1,24 @@
 import React, { useCallback, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
 import useInput from '../hooks/useInput';
 import Head from 'next/head';
 import AppLayout from '../components/AppLayout';
 
 import styled from 'styled-components';
 import { Form, Input, Checkbox, Button } from 'antd';
+import { SIGN_UP_REQUEST } from '../reducers/user';
 
 const ErrorMessage = styled.div`
     color: red;
 `;
 
 const Signup = () => {
-    // 커스텀 훅 추가
-    // 너무 반복되기때문에 커스텀 훅을 만들자
-    // 훅은 컴포넌트 안에서만 된다.(뎁스가 1단계일때)
-    const [id, onChangeId] = useInput('');
+    const dispatch = useDispatch();
+    const { signUpLoading } = useSelector((state) => state.user);
+
+    // id는 mySql이랑 충돌나서 email로 전체 변경
+    const [email, onChangeEmail] = useInput('');
     const [nickname, onChangeNickname] = useInput('');
     const [password, onChangePassword] = useInput('');
     const [passwordCheck, setPasswordCheck] = useState('');
@@ -42,8 +46,12 @@ const Signup = () => {
             return setTermError(true);
         }
 
-        console.log(id, nickname, password);
-    }, [password, passwordCheck, term]);
+        console.log(email, nickname, password);
+        dispatch({
+            type: SIGN_UP_REQUEST,
+            data: { email, password, nickname },
+        })
+    }, [email, password, passwordCheck, term]);
 
     return(
         <AppLayout>
@@ -53,13 +61,14 @@ const Signup = () => {
 
             <Form onFinish={ouSubmit}>
                 <div>
-                    <label htmlFor="user-id">아이디</label>
+                    <label htmlFor="user-email">이메일</label>
                     <br />
                     <Input 
-                        name="user-id" 
-                        value={id} 
+                        type="email"
+                        name="user-email" 
+                        value={email} 
                         required 
-                        onChange={onChangeId} 
+                        onChange={onChangeEmail} 
                     />
                 </div>
 
@@ -115,7 +124,11 @@ const Signup = () => {
                     작업 후 최적화할 수 있으면 하자
                  */}
                 <div style={{ marginTop: 10 }}>
-                    <Button type="primary" htmlType="submit">
+                    <Button 
+                        type="primary" 
+                        htmlType="submit"
+                        loading={signUpLoading}
+                    >
                         가입하기
                     </Button>
                 </div>

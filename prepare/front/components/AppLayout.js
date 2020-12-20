@@ -46,11 +46,7 @@ const InputSearch = styled(Input.Search)`
 `;
 
 const AppLatout = ({ children }) => {
-
-    // 정확하게 꺼내쓰는 법
-    // const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-    // 한단계 더 들어가 쓰는 법, 구조분해. (위 아래는 취향차이, 성능은 미미)
-    const { isLoggedIn } = useSelector((state) => state.user);
+    const { me } = useSelector((state) => state.user);
 
     return(
         <div>
@@ -85,7 +81,7 @@ const AppLatout = ({ children }) => {
                     md 25%                
                 */}
                 <Col xs={24} md={6}>
-                    {isLoggedIn ? <UserProfile /> : <LoginForm />}
+                    {me ? <UserProfile /> : <LoginForm />}
                 </Col>
                 <Col xs={24} md={12}>
                     {children}

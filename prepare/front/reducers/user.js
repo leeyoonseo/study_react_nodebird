@@ -121,7 +121,7 @@ const reducer = (state = initialState, action) => {
                 signUpLoading: false,
                 signUpDone: true,
             };
-        case SIGN_U:
+        case SIGN_UP_FAILURE:
             return{
                 ...state,
                 signUpLoading: false,

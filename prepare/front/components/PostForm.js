@@ -1,27 +1,27 @@
 // Next에서 React를 안써도되지만 eslint를 쓸때는 넣어주지 않으면 에러가 난다.
 // 실제로 안써도 문제는 없다.
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import { addPost } from '../reducers/post';
 
 const PostForm = () => {
-    const { imagePaths } = useSelector((state) => state.post);
+    const { imagePaths, addPostDone } = useSelector((state) => state.post);
     const dispatch = useDispatch();
-    
-    // ref를 통한 돔 조작
-    const imageInput = useRef();
-    const [text, setText] = useState('');
+    const [text, onChangeText, setText] = useInput('');
 
-    const onChangeText = useCallback((e) => {
-        setText(e.target.value);
-    }, []);
+    useEffect(() => {
+        if(addPostDone){
+            setText('');
+        }
+    }, [addPostDone]);
 
     const onSubmit = useCallback(() => {
-        dispatch(addPost);
+        dispatch(addPost(text));
         setText('');
-    }, []);
+    }, [text]);
 
+    const imageInput = useRef();
     const onClickImageUpload = useCallback(() => {
         imageInput.current.click();
     }, [imageInput.current]);

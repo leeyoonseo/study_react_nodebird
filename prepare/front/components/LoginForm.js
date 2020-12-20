@@ -22,29 +22,30 @@ const LoginForm = () => {
     const dispatch = useDispatch();
 
     // 커스텀 훅 추가함으로써 기존 코드들 삭제
-    const [id, onChangeId] = useInput('');
+    const [email, onChangeEmail] = useInput('');
     const [password, onChangePassword] = useInput('');
-    const { isLoggingIn } = useSelector((state) => state.user);
+    const { logInLoading } = useSelector((state) => state.user);
     // 리렌더링되도 style 함수는 useMemo로 인해 캐싱되어있다.
     // const styleFunc = useMemo(() => ({ marginTop: 10}), []);
     const onSubmitForm = useCallback(() => {
         // antd에 e.preventdefault넣으면안됨
         // onFinish에 적용이되어있기 때문에
         // e.preventDefault();
-        console.log(id, password);
-        dispatch(loginRequestAction(id, password));
-    }, [id, password]);
+        console.log(email, password);
+        dispatch(loginRequestAction(email, password));
+    }, [email, password]);
 
     return(
         // onFinish에는 e.preventDefault가 자동으로 적용되어있다.
         <FormWrapper onFinish={onSubmitForm}>
             <div>
-                <label htmlFor="user-id">아이디</label>
+                <label htmlFor="user-email">이메일</label>
                 <br />
                 <Input 
-                    name="user-id" 
-                    value={id} 
-                    onChange={onChangeId} 
+                    type="email"
+                    name="user-email" 
+                    value={email} 
+                    onChange={onChangeEmail} 
                     required 
                 />
             </div>
@@ -80,7 +81,7 @@ const LoginForm = () => {
                 <Button 
                     type="primary" 
                     htmlType="submit" 
-                    loading={isLoggingIn}
+                    loading={logInLoading}
                 >
                     로그인
                 </Button>

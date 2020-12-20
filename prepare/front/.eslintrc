@@ -1,21 +1,17 @@
 {
-    // 본인의 스타일대로 커스텀하면됨..
-
-
+    // 바벨 eslint가 해석해줌
+    "parser": "babel-eslint",
     "parserOptions": {
         // 최신문법
         "ecmaVersion": 2020,
 
-
         // 모듈시스템(import, export)
         "sourceType": "module",
-
 
         // react의 문법
         "ecmaFeatures" : {
             "jsx": true
         },
-
 
         // 문법
         "env": {
@@ -24,14 +20,14 @@
             "es6": true
         },
 
-
         // 실제 규칙, 아래 2개는 너그러운 문법
         // 나중에 엄격한 문법으로 변경해주는게 좋다.
         "extends": [
-            "eslint:recommend",
-            "plugin:react/recomended"
+            // 문법 규제가 너무 약하므로 airbnb로 수정
+            // "eslint:recommend",
+            // "plugin:react/recomended"
+            "airbnb"
         ],
-
 
         // 플러그인
         "plugins": [
@@ -39,12 +35,17 @@
             "react-hooks"
         ],
 
-
         "rules": {
-
-
+            // 사용하지않을 룰 off 해주면됨
+            "jsx-a11y/label-has-associated-control": "off",
+            "jsx-a11y/anchor-is-valid": "off",
+            "no-console": "off",
+            "no-underscore-dangle": "off",
+            "react/forbid-prop-types": "off",
+            "react/jsx-filename-extension": "off",
+            "react/jsx-one-expression-per-line": "off",
+            "object-curly-newline": "off",
+            "linebreak-style": "off"
         }
-
-
     }
 }

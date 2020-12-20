@@ -7,7 +7,7 @@ import { logoutRequestAction } from '../reducers/user';
 
 const UserProfile = () => {
     const dispatch = useDispatch();
-    const { me, isLoggingOut } = useSelector((state) => state.user);
+    const { me, logOutLoading } = useSelector((state) => state.user);
     const onLogOut = useCallback(() => {
         dispatch(logoutRequestAction());
     }, []);
@@ -16,9 +16,9 @@ const UserProfile = () => {
         // 배열에는 key값을 넣어줘야한다.
         <Card
             actions={[
-                <div key="twit">짹짹<br />0</div>,
-                <div key="followings">팔로잉<br />0</div>,
-                <div key="followings">팔로워<br />0</div>,
+                <div key="twit">짹짹<br />{me.Posts.length}</div>,
+                <div key="followings">팔로잉<br />{me.Followings.length}</div>,
+                <div key="followings">팔로워<br />{me.Followers.length}</div>,
             ]}
         >
             {/* 카드컴포넌트는 아바타컴포넌트로 아바타를 넣을 수 있다. */}
@@ -27,7 +27,7 @@ const UserProfile = () => {
                 title={me.nickname}
             />
             <Button 
-                loading={isLoggingOut}
+                loading={logOutLoading}
                 onClick={onLogOut}
             >
                 로그아웃

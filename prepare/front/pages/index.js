@@ -24,13 +24,13 @@ const Home = () => {
             console.log(
                 
                 // document 총 길이에서 얼마나 내렸는지
-                window.scrollY,
+                // window.scrollY,
 
                 // 브라우저 화면 보이는 길이
-                document.documentElement.clientHeight, 
+                // document.documentElement.clientHeight, 
 
                 // document 총 길이
-                document.documentElement.scrollHeight
+                // document.documentElement.scrollHeight
             );
             
             // scrollY + clientHeight = scrollHeight

@@ -37,12 +37,13 @@ function logoutAPI(){
     return axios.post('/api/logout');
 }
 
-function* logout(){
+function* logout(action){
     try{
-        const result = yield call(logoutAPI);
+        // const result = yield call(logoutAPI);
+        yield delay(1000);
         yield put({
             type: LOG_OUT_SUCCESS,
-            data: result.data,
+            data: action.data,
         });
 
     } catch(err){

@@ -10,6 +10,7 @@ import PostCardContent from './PostCardContent';
 
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
+    console.log('postCard',post)
     const [liked, setLiked] = useState(false);
     const [commentFormOpend, setCommentFormOpend] = useState(false);
 

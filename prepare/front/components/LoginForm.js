@@ -20,18 +20,12 @@ const FormWrapper = styled(Form)`
 
 const LoginForm = () => {
     const dispatch = useDispatch();
-
-    // 커스텀 훅 추가함으로써 기존 코드들 삭제
     const [email, onChangeEmail] = useInput('');
     const [password, onChangePassword] = useInput('');
     const { logInLoading } = useSelector((state) => state.user);
-    // 리렌더링되도 style 함수는 useMemo로 인해 캐싱되어있다.
-    // const styleFunc = useMemo(() => ({ marginTop: 10}), []);
+    
     const onSubmitForm = useCallback(() => {
-        // antd에 e.preventdefault넣으면안됨
-        // onFinish에 적용이되어있기 때문에
-        // e.preventDefault();
-        console.log(email, password);
+        console.log('onSubmitForm', email, password);
         dispatch(loginRequestAction(email, password));
     }, [email, password]);
 

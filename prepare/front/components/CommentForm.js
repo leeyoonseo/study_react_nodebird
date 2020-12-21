@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Form, Input, Button } from 'antd';
 import useInput from '../hooks/useInput';
@@ -19,8 +19,6 @@ const CommentForm = ({ post }) => {
     }, [addCommentDone]);
 
     const onSubmitComment = useCallback(() => {
-        console.log(post.id, commentText);
-
         dispatch({
             type: ADD_COMMENT_REQUEST,
             data: { 

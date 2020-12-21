@@ -1,3 +1,4 @@
+
 export const initialState = {
     logInLoading: false, // 로그인 시도중
     logInDone: false,
@@ -5,14 +6,18 @@ export const initialState = {
     logOutLoading: false, // 로그아웃 시도중
     logOutDone: false,
     logOutError: null,
-    signUpLoading: false, // 로그아웃 시도중
+    signUpLoading: false, // 회원가입 시도중
     signUpDone: false,
     signUpFailure: null,
+    changeNicknameLoading: false, // 닉네임 변경 시도중
+    changeNicknameDone: false,
+    changeNicknameFailure: null,
     me: null,
     signUpData: {},
     loginData: {},
 };
 
+/*
 export const loginAction = (data) => {
     return (dispatch, getState) => {
 
@@ -29,6 +34,7 @@ export const loginAction = (data) => {
             });
     }
 }
+*/
 
 // 너무 길어지면 분리해도됨
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
@@ -43,6 +49,10 @@ export const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
 export const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
 export const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
 
+export const CHANGE_NICKNAME_REQUEST = 'SIGN_UP_REQUEST';
+export const CHANGE_NICKNAME_SUCCESS = 'SIGN_UP_SUCCESS';
+export const CHANGE_NICKNAME_FAILURE = 'SIGN_UP_FAILURE';
+
 export const FOLLOW_REQUEST = 'FOLLOW_REQUEST';
 export const FOLLOW_SUCCESS = 'FOLLOW_SUCCESS';
 export const FOLLOW_FAILURE = 'FOLLOW_FAILURE';
@@ -51,6 +61,14 @@ export const UNFOLLOW_REQUEST = 'UNFOLLOW_REQUEST';
 export const UNFOLLOW_SUCCESS = 'UNFOLLOW_SUCCESS';
 export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 
+const dummyUser = (data) => ({
+    ...data,
+    nickname: 'okayoon',
+    id: 1,
+    Posts: [],
+    Followings: [],
+    Followers: [],
+});
 
 // success와 failure액션은 saga가 호출하기 때문에 우리가 액션을 만들 필요는 없다
 export const loginRequestAction = (data) => {
@@ -126,6 +144,25 @@ const reducer = (state = initialState, action) => {
                 ...state,
                 signUpLoading: false,
                 signUpError: action.error,
+            };
+        case CHANGE_NICKNAME_REQUEST: 
+            return{
+                ...state,
+                changeNicknameLoading: true,
+                changeNicknameDone: false,
+                changeNicknameError: null,
+            };
+        case CHANGE_NICKNAME_SUCCESS:
+            return{
+                ...state,
+                changeNicknameLoading: false,
+                changeNicknameDone: true,
+            };
+        case CHANGE_NICKNAME_FAILURE:
+            return{
+                ...state,
+                changeNicknameLoading: false,
+                changeNicknameError: action.error,
             };
         default: 
             return state;

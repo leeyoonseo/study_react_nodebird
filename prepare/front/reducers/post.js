@@ -1,10 +1,7 @@
-// User, Images, Comments만 대문자로 시작하는가?
-// DB쪽에서 쓰는 시퀄라이즈와 연관이있다고한다.
-// 어떤 정보나 다른 관계된것이 있으면 합쳐준다고하고
-// 합쳐주면 대문자로 나온다고하는데, 이대로 유지해서 작업..
-// id, content는 게시글 정보, 대문자는 합쳐진 정보
-// 하지만 서버쪽 설정으로 소문자로 변경할 수도 있다
-// 따라서 서버쪽 개발자에게 먼저 문의하는게 좋겠지?
+// 랜덤하게 id 생성하는 라이브러리로 
+// 실무에서 id 생성이 애매할 경우에도 사용할수있다.
+import shortId from 'shortid';
+
 export const initialState = {
     mainPosts: [{
         id: 1,
@@ -40,17 +37,19 @@ export const initialState = {
     addPostLoading: false,
     addPostDone: false,
     addPostError: null,
+    addCommentLoading: false,
+    addCommentDone: false,
+    addCommentError: null,
 };
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
 export const ADD_POST_FAILURE = 'ADD_POST_FAILURE';
 
-export const ADD_COMMENT_REQUEST = 'ADD_POST_REQUEST';
-export const ADD_COMMENT_SUCCESS = 'ADD_POST_SUCCESS';
-export const ADD_COMMENT_FAILURE = 'ADD_POST_FAILURE';
+export const ADD_COMMENT_REQUEST = 'ADD_COMMENT_REQUEST';
+export const ADD_COMMENT_SUCCESS = 'ADD_COMMENT_SUCCESS';
+export const ADD_COMMENT_FAILURE = 'ADD_COMMENT_FAILURE';
 
-// action을 그때그때 생성해주는 creator
 export const addPost = (data) => ({
     type : ADD_POST_REQUEST,
     data,
@@ -61,16 +60,28 @@ export const addComment = (data) => ({
     data,
 });
 
-const dummyPost = {
-    id: 2,
-    content: '더미데이터',
+const dummyPost = (data) => ({
+    id: shortId.generate(),
+    content: data,
     User: {
         id: 1,
-        nickname: '최초',
+        nickname: 'okayoon',
     },
     Images: [],
-    Commnets: [],
-};
+    Comments: [],
+});
+
+const dummyComment = (data) => ({
+    id: shortId.generate(),
+    content: data,
+    User: {
+        id: 1,
+        nickname: 'okayoon'
+    }
+});
+
+// 흐름에 유의할 것
+// request -> saga -> reducer -> success -> view -> useEffect...
 
 const reducer = (state = initialState, action) => {
     switch(action.type){
@@ -84,7 +95,10 @@ const reducer = (state = initialState, action) => {
         case ADD_POST_SUCCESS:
             return{
                 ...state,
-                mainPosts: [dummyPost, ...state.mainPosts],
+                mainPosts: [
+                    dummyPost(action.data), 
+                    ...state.mainPosts
+                ],
                 addPostLoading: false,
                 addPostDone: true,
             };
@@ -101,12 +115,28 @@ const reducer = (state = initialState, action) => {
                 addCommentDone: false,
                 addCommentError: null,                
             };
-        case ADD_COMMENT_SUCCESS:
+        case ADD_COMMENT_SUCCESS: {
+            // 불변성을 유지하기 위해서...ㅠㅠ
+            // 이것을 편하게 하기위한 라이브러리가있다. 이머?
+            const postIndex = state.mainPosts.findIndex((v) => v.id === action.data.postId);
+            const post = state.mainPosts[postIndex];
+            const Comments = [
+                dummyComment(action.data.content),
+                ...post.Comments
+            ];
+            const mainPosts = [ ...state.mainPosts ];
+            mainPosts[postIndex] = {
+                ...post,
+                Comments
+            };
+
             return{
                 ...state,
+                mainPosts,
                 addCommentLoading: false,
                 addCommentDone: true,
             };
+        }
         case ADD_COMMENT_FAILURE:
             return{
                 ...state,

@@ -45,7 +45,9 @@
             "react/jsx-filename-extension": "off",
             "react/jsx-one-expression-per-line": "off",
             "object-curly-newline": "off",
-            "linebreak-style": "off"
+            "linebreak-style": "off",
+            // immer하려면 off
+            "no-param-reassign": "off",
         }
     }
 }

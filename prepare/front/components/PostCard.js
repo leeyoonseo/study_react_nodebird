@@ -118,7 +118,7 @@ PostCard.propTypes = {
 
     // shape를 써서 내부 prop들을 정의할 수 있다.
     post: PropTypes.shape({
-        id: PropTypes.number,
+        id: PropTypes.string,
         
         // 이런것도 shape를 사용해 구체적으로 쓰면 좋다.
         User: PropTypes.object,

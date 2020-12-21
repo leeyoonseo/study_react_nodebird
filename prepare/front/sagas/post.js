@@ -4,12 +4,37 @@ import axios from 'axios';
 import shortId from 'shortid';
 
 import {
+    LOAD_POSTS_REQUEST, LOAD_POSTS_SUCCESS, LOAD_POSTS_FAILURE,
     ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_POST_FAILURE,
     REMOVE_POST_REQUEST, REMOVE_POST_SUCCESS, REMOVE_POST_FAILURE,
-    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE,
+    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, generateDummyPost,
 
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
+
+function loadPostsAPI(data){
+    return axios.post('/api/posts', data);
+}
+
+function* loadPosts(action){
+    try{
+        // const result = yield call(loadPostsAPI, action.data);
+        yield delay(1000);
+        const id = shortId.generate();
+        
+        yield put({
+            type: LOAD_POSTS_SUCCESS,
+            data: generateDummyPost(10),
+        });
+    } catch(err){
+        yield put({
+            type: LOAD_POSTS_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+
 
 function addPostAPI(data){
     return axios.post('/api/post', data);
@@ -99,6 +124,14 @@ function* addComment(action){
     }
 }
 
+function* watchLoadPosts(){
+    // throttle로 scroll 이벤트 여러번 방지
+    // throttle이 5초를 지켜주지만, 기존 요청을 취소하지않음
+    // 5초 뒤 하나가 더 성공하는 문제가 생김
+    // 요청을 한번만 보낼수는없을까? loadPostsLoading을 이용하자.
+    yield throttle(5000, LOAD_POSTS_REQUEST, loadPosts);
+}
+
 function* watchAddPost(){
     yield takeLatest(ADD_POST_REQUEST, addPost);
 }
@@ -114,7 +147,12 @@ function* watchAddComment(){
 export default function* postSaga(){
     yield all([
         fork(watchAddPost),
+        fork(watchLoadPosts),
         fork(watchRemovePost),
         fork(watchAddComment),
     ]);
 }
+
+
+// TODO
+// 1. react-virtualized 사용해보기

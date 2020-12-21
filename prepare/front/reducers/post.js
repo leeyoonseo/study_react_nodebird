@@ -11,84 +11,50 @@ import produce from 'immer';
 import faker from 'faker';
 
 export const initialState = {
-    mainPosts: [{
-        id: 1,
-        User: {
-            id: 1, 
-            nickname: '오키',
-        },
-        content: '첫 번째 게시글 #해시태그 #익스프레스',
-        Images: [{
-            id: shortId.generate(),
-            src: 'https://newsimg.hankookilbo.com/cms/articlerelease/2019/04/29/201904291390027161_3.jpg'
-        }, {
-            id: shortId.generate(),
-            src: 'http://www.animaltogether.com/news/photo/202007/1913_4321_523.jpg'
-        }, {
-            id: shortId.generate(),
-            src: 'https://kr.theepochtimes.com/assets/uploads/2020/07/d6jdut6bi6k41-795x436.jpg'
-        }, {
-            id: shortId.generate(),
-            src: 'https://i.fltcdn.net/contents/954/original_1420186568382_ixqg3zq6w29.jpeg'
-        }],
-        // 대문자(서버에서 주는 애들)들은 id가 있어야함
-        Comments: [{
-            id: shortId.generate(),
-            User: {
-                id: shortId.generate(),
-                nickname:'와우'
-            },
-            content: '새로운 것이다~',
-        },{
-            id: shortId.generate(),
-            User: {
-                id: shortId.generate(),
-                nickname:'그린뉴딜'
-            },
-            content: '기도메타중입니다..할레루야',
-        }]
-    }],
-    // 이미지 저장 경로
+    mainPosts: [],
     imagePaths: [],
-
+    hasMorePosts: true,
+    loadPostsLoading: false,
+    loadPostsDone: false,
+    loadPostsError: null,
     addPostLoading: false,
     addPostDone: false,
     addPostError: null,
-
     removePostLoading: false,
     removePostDone: false,
     removePostError: null,
-
     addCommentLoading: false,
     addCommentDone: false,
     addCommentError: null,
 };
 
 // faker를 이용한 dummydata
-// 성능최적화 테스트할때 몇 천개 작업할 것
-initialState.mainPosts = initialState.mainPosts.concat(
-    Array(20).fill().map(() => ({
+// 성능최적화 테스트할때 몇 천개 작업해볼 것
+export const generateDummyPost = (number) => Array(20).fill().map(() => ({
+    id: shortId.generate(),
+    User: {
         id: shortId.generate(),
+        nickname: faker.name.findName(),
+    },
+    content: faker.lorem.paragraph(),
+    // dummy 이미지 같이 크기만큼 공간을 차지하고 싶으면
+    // placeholder.com을 사용하면 좋다.
+    // lorempixel.com도 있다.
+    Images: [{
+        src: faker.image.image(),
+    }],
+    Comments: [{
         User: {
             id: shortId.generate(),
             nickname: faker.name.findName(),
         },
-        content: faker.lorem.paragraph(),
-        // dummy 이미지 같이 크기만큼 공간을 차지하고 싶으면
-        // placeholder.com을 사용하면 좋다.
-        // lorempixel.com도 있다.
-        Images: [{
-            src: faker.image.imageUrl(),
-        }],
-        Comments: [{
-            User: {
-                id: shortId.generate(),
-                nickname: faker.name.findName(),
-            },
-            content: faker.lorem.sentence(),
-        }],
-    })),
-);
+        content: faker.lorem.sentence(),
+    }],
+}));
+
+export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
+export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
+export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -145,6 +111,24 @@ const dummyComment = (data) => ({
     // *단 state는 건들면 안됨!!!
 const reducer = (state = initialState, action) => produce(state, (draft) =>{
     switch(action.type){
+        case LOAD_POSTS_REQUEST:
+            draft.loadPostsLoading = true;
+            draft.loadPostsDone = false;
+            draft.loadPostsError = null;   
+            break;        
+
+        case LOAD_POSTS_SUCCESS:
+            draft.mainPosts = action.data.concat(draft.mainPosts);
+            draft.loadPostsLoading = false;
+            draft.loadPostsDone = true;
+            draft.hasMorePosts = draft.mainPosts.length < 50;
+            break;
+
+        case LOAD_POSTS_FAILURE:
+            draft.loadPostsLoading = false;
+            draft.loadPostsError = action.error;
+            break;
+
         case ADD_POST_REQUEST:
             draft.addPostLoading = true;
             draft.addPostDone = false;

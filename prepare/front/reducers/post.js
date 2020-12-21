@@ -7,11 +7,14 @@ import shortId from 'shortid';
 // 다른 스타일로 코딩해보기 https://immerjs.github.io/immer/docs/curried-produce
 import produce from 'immer';
 
+// faker : 가짜 더미 데이터
+import faker from 'faker';
+
 export const initialState = {
     mainPosts: [{
         id: 1,
         User: {
-            id: 1,
+            id: 1, 
             nickname: '오키',
         },
         content: '첫 번째 게시글 #해시태그 #익스프레스',
@@ -60,6 +63,32 @@ export const initialState = {
     addCommentDone: false,
     addCommentError: null,
 };
+
+// faker를 이용한 dummydata
+// 성능최적화 테스트할때 몇 천개 작업할 것
+initialState.mainPosts = initialState.mainPosts.concat(
+    Array(20).fill().map(() => ({
+        id: shortId.generate(),
+        User: {
+            id: shortId.generate(),
+            nickname: faker.name.findName(),
+        },
+        content: faker.lorem.paragraph(),
+        // dummy 이미지 같이 크기만큼 공간을 차지하고 싶으면
+        // placeholder.com을 사용하면 좋다.
+        // lorempixel.com도 있다.
+        Images: [{
+            src: faker.image.imageUrl(),
+        }],
+        Comments: [{
+            User: {
+                id: shortId.generate(),
+                nickname: faker.name.findName(),
+            },
+            content: faker.lorem.sentence(),
+        }],
+    })),
+);
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';

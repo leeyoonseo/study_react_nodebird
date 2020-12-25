@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 
             // 필수여부
             allowNull: false, // 필수, true = 선택적
+            unique: true, // 중복되면 안되기에 고유한 값
         },
         nickname: {
             type: DataTypes.STRING(30),
@@ -29,9 +30,19 @@ module.exports = (sequelize, DataTypes) => {
         collate: 'utf8_general_ci',
     });
 
-    // db들간의 관계는 associate에 작성한다.
     // mysql은 관계형 데이터베이스라고함
-    User.associate = (db) => {};
+    // db들간의 관계는 associate에 작성한다.
+    // 1:1, 1:n 관계인지..
+    User.associate = (db) => {
+        // 한사람이 여러 게시글을 작성할 수 있음.
+        db.User.hasMany(db.Post);
+        db.User.hasMany(db.Comment);
+
+        // 1:1 (유저랑 유저정보일경우 1:1일텐데)
+        // db.User.hasOne(db.UserInfo);
+        // belongsTo가 들어가는 곳에 user_id, post_id값이 생김
+        // n:1은 없다.
+    };
 
     return User;
 };

@@ -42,6 +42,33 @@ module.exports = (sequelize, DataTypes) => {
         // db.User.hasOne(db.UserInfo);
         // belongsTo가 들어가는 곳에 user_id, post_id값이 생김
         // n:1은 없다.
+
+        // n:n 관계는 둘다 belongeToMany
+        db.User.belongsToMany(db.Post, {
+            // 중간 매핑테이블 네임을 지정해줄 수도 있다.
+            // 중요한 것은 항상 매핑되는 반대쪽에도 똑같이 선언해줘야한다.(기본은 UserPost가 되기때문에)
+            througt: 'Like',
+            as: 'Liked'
+        });
+
+        // 팔로워
+        // 같은 db 컬럼(?) 작업을 할때 foreignKey가 등장한다.
+        // (찾기 시작하는 시작점이 되는 것)
+        db.User.belongsToMany(db.User, {
+            // 테이블이름변경
+            througt: 'Follow',
+            as: 'Followers',
+
+            // 왜 User-User일때 foreignKey가 등장하는가?
+            // 컬럼의 아이디를 바꿔주는것?
+            foreignKey: 'FollowingId'
+        });
+
+        db.User.belongsToMany(db.User, {
+            througt: 'Follow',
+            as: 'Followings',
+            foreignKey: 'FollowerId'
+        });
     };
 
     return User;

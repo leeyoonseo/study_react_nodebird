@@ -12,7 +12,9 @@ module.exports = (sequelize, DataTypes) => {
 
     Hashtag.associate = (db) => {
         // n:n 관계는 둘다 belongeToMany
-        db.Hashtag.belongsToMany(db.Post);
+        db.Hashtag.belongsToMany(db.Post, {
+            through: 'PostHashtag',
+        });
 
     };
 

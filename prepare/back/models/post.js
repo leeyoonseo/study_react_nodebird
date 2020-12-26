@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     const Post = sequelize.define('Post', { 
         content: {
             // 길이 무제한?
-            type: DataTypes.Text,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
 
@@ -25,11 +25,14 @@ module.exports = (sequelize, DataTypes) => {
         db.Post.hasMany(db.Image);
 
         // n:n 관계는 둘다 belongeToMany
-        db.Post.belongsToMany(db.HashTag);
+        db.Post.belongsToMany(db.Hashtag, {
+            through: 'PostHashtag',
+        });
+
         db.Post.belongsToMany(db.User, {
             // 중간 매핑테이블 네임을 지정해줄 수도 있다.
             // 중요한 것은 항상 매핑되는 반대쪽에도 똑같이 선언해줘야한다.(기본은 UserPost가 되기때문에)
-            througt: 'Like',
+            through: 'Like',
 
             // 상단에 belongsTo와 구분하기 위해 as를 추가해줄 수 있다. (별칭)
             // db user에 대한 이름을 바꿀 수 있다.

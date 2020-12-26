@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
         db.User.belongsToMany(db.Post, {
             // 중간 매핑테이블 네임을 지정해줄 수도 있다.
             // 중요한 것은 항상 매핑되는 반대쪽에도 똑같이 선언해줘야한다.(기본은 UserPost가 되기때문에)
-            througt: 'Like',
+            through: 'Like',
             as: 'Liked'
         });
 
@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         // (찾기 시작하는 시작점이 되는 것)
         db.User.belongsToMany(db.User, {
             // 테이블이름변경
-            througt: 'Follow',
+            through: 'Follow',
             as: 'Followers',
 
             // 왜 User-User일때 foreignKey가 등장하는가?
@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         db.User.belongsToMany(db.User, {
-            througt: 'Follow',
+            through: 'Follow',
             as: 'Followings',
             foreignKey: 'FollowerId'
         });

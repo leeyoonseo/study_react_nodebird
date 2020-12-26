@@ -2,7 +2,7 @@ module.exports = (sequelize, DataTypes) => {
 
     const Comment = sequelize.define('Comment', { 
         content: {
-            type: DataTypes.Text,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
         // 대문자로?

@@ -56,16 +56,18 @@ function* logout(action){
     }
 }
 
-function signUpAPI(){
-    return axios.post('/api/signUp');
+function signUpAPI(data){
+    // 백엔드 서버 주소여야함.
+    // get, delete는 데이터를 못 넘김, post put fatch는 데이터를 넘길 수 있음
+    return axios.post('http://localhost:3306/user', data);
 }
 
-function* signUp(){
+function* signUp(action){
     try{
-        // const result = yield call(signUpAPI);
-        yield delay(1000);
-        // 만약 throw new Error('')를 쓴다면 catch문 실행됨
-        // throw new Error('');
+        // action.data를 인자로 전달
+        const result = yield call(signUpAPI, action.data);
+        console.log(result);
+        
         yield put({
             type: SIGN_UP_SUCCESS,
         });

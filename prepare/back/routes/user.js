@@ -45,6 +45,11 @@ router.post('/', async (req, res, next) => { // POST /user/
             password: hashedPassword,
         });
 
+        // CORS 해결
+        // 차단은 브라우저가하지만 허용은 서버가 해야한다.
+        // res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3060');
+        // 또는 미들웨어 사용
+
         // 비동기로 작업이 되면 res.json이 먼저 실행되는 문제가 생길 수 있기에..(async, await을 써야함)
         // res.json(); // res.send('OK'); 로 작업해도됨.
         // 200으로해도되나 201은 잘 생성되었다는 좀 더 디테일한 값

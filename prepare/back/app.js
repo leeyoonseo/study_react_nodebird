@@ -7,6 +7,9 @@ const userRouter = require('./routes/user');
 // db
 const db = require('./models');
 
+// CORS
+const cors = require('cors');
+
 const app = express();
 
 // promise라고 함
@@ -33,6 +36,18 @@ app.get('/posts', (req, res) => {
         { id: 3, content: 'hello3'},
     ]);
 });
+
+// CORS 설정
+// CORS는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
+app.use(cors({
+    origin: '*',
+    credentials: false, // 나중에 true로해야함.
+}));
+// 예시
+// app.use(cors({
+//     origin: 'http://nodebird.com'
+// }));
+// origin: true로 설정하면 *대신 보낸곳의 주소가 자동으로 들어간다.
 
 // 중복되는 것들을 인수로 넣어줌으로써 postRouter에는 
 // prefix로 /post/ 가 붙음

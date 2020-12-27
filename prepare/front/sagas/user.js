@@ -59,7 +59,7 @@ function* logout(action){
 function signUpAPI(data){
     // 백엔드 서버 주소여야함.
     // get, delete는 데이터를 못 넘김, post put fatch는 데이터를 넘길 수 있음
-    return axios.post('http://localhost:3306/user', data);
+    return axios.post('http://localhost:3065/user', data);
 }
 
 function* signUp(action){

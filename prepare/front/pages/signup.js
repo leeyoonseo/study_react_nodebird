@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-
+import Router from 'next/router';
 import useInput from '../hooks/useInput';
 import Head from 'next/head';
 import AppLayout from '../components/AppLayout';
@@ -8,6 +8,7 @@ import AppLayout from '../components/AppLayout';
 import styled from 'styled-components';
 import { Form, Input, Checkbox, Button } from 'antd';
 import { SIGN_UP_REQUEST } from '../reducers/user';
+import router from '../../back/routes/user';
 
 const ErrorMessage = styled.div`
     color: red;
@@ -15,7 +16,19 @@ const ErrorMessage = styled.div`
 
 const Signup = () => {
     const dispatch = useDispatch();
-    const { signUpLoading } = useSelector((state) => state.user);
+    const { signUpLoading, signUpDone, signUpError } = useSelector((state) => state.user);
+
+    useEffect(() => {
+        if(signUpDone){
+            Router.push('/');
+        }
+    }, [ signUpDone ]);
+
+    useEffect(() => {
+        if(signUpError){
+            alert(signUpError);
+        }
+    }, [ signUpError ]);
 
     // id는 mySql이랑 충돌나서 email로 전체 변경
     const [email, onChangeEmail] = useInput('');

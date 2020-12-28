@@ -3,9 +3,57 @@ const express = require('express');
 // 비밀번호 암호화
 const bcrypt = require('bcrypt');
 
+// 로그인 전략
+const passport = require('passport');
+
 // db 만든거
 const { User } = require('../models');
+const { noExtendRight, iRegexp } = require('sequelize/types/lib/operators');
 const router = express.Router();
+
+// // 로그인 전략
+// // 두번째 인자로 전달되는 것은 passport/local.js에서 done 함수임
+// router.post('/login', passport.authenticate('local', (err, user, info) => {
+//     // (err, user, info)
+//     // done(null, false, { reason: '존재하지 않는 이메일입니다.' });
+
+//     if(err){
+//         console.error(err);
+
+//         // express가 에러처리하도록 next에 넣어 보냈지만
+//         // 이 스코프에는 next가 없음.
+//         next(error);
+//     }
+// }));
+
+// 위의 함수를 미들웨어 확장하는 방법으로 변경하여 next에 에러를 전달하도록 수정
+// 미들웨어를 확장하는 방식
+router.post('/login', (req, res, next) => {
+    passport.authenticate('locat', (err, user, info) => {
+        if(err){
+            console.error(err);
+            next(err);
+        }
+
+        if(info){
+            // 403은 금지라는 의미
+            // 401은 허가되지않음
+            return res.status(401).send(info.reason);
+        }
+
+        // 이게 로그인하는것
+        // loginErr는 패스포트에서 에러나는것
+        return req.login(user, async(loginErr) => {
+            if(loginErr){
+                console.error(loginErr);
+                return next(loginErr);
+            }
+
+            // 사용자 정보를 프론트로
+            return res.json(user);
+        });
+    })(req, res, next);
+});
 
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,

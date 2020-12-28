@@ -11,20 +11,18 @@ import {
 } from '../reducers/user';
 
 function loginAPI(data){
-    return axios.post('/api/login', data);
+    // 백엔드 주소
+    // 중복되는 주소들 제거
+    return axios.post('/user/login', data);
 }
 
 function* login(action){
     try{
-        // const result = yield call(loginAPI, action.data);
-
-        // 아직서버가 없어서 에러가 날수도 있으므로 가짜로 작업해보겠음..
-        yield delay(1000);
-        // const result = yield loginAPI(action.data);
+        const result = yield call(loginAPI, action.data);
 
         yield put({
             type: LOG_IN_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
 
     } catch(err){
@@ -36,7 +34,7 @@ function* login(action){
 }
 
 function logoutAPI(){
-    return axios.post('/api/logout');
+    return axios.post('/logout');
 }
 
 function* logout(action){
@@ -59,7 +57,7 @@ function* logout(action){
 function signUpAPI(data){
     // 백엔드 서버 주소여야함.
     // get, delete는 데이터를 못 넘김, post put fatch는 데이터를 넘길 수 있음
-    return axios.post('http://localhost:3065/user', data);
+    return axios.post('/user', data);
 }
 
 function* signUp(action){

@@ -9,6 +9,7 @@ const db = require('./models');
 
 // CORS
 const cors = require('cors');
+const passportConfig = require('./passport');
 
 const app = express();
 
@@ -19,6 +20,8 @@ db.sequelize.sync()
         console.log('db 연결 성공!');
     })
     .catch(console.error);
+
+passportConfig();
 
 // 다른 라우터보다 위에 있어야함 (미들웨어는 순서대로 실행되기 때문에 라우터 실행전에 선언되어야함)
 // json, urlencoded는 프론트에서 데이터 넘기면 해석해서 req.body안에 넣어주는 역할

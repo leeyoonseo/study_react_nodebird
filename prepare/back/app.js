@@ -10,6 +10,16 @@ const db = require('./models');
 // CORS
 const cors = require('cors');
 const passportConfig = require('./passport');
+const passport = require('passport');
+
+// session
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+
+// .env
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 
@@ -27,6 +37,22 @@ passportConfig();
 // json, urlencoded는 프론트에서 데이터 넘기면 해석해서 req.body안에 넣어주는 역할
 app.use(express.json()); // json 형식데이터로 처리
 app.use(express.urlencoded({ extended: true })); // form submit했을때 url인코딩방식으로 넘어온 데이터 처리..
+
+// session 설정
+// 쿠키, 세션이 필요한것은 브라우저-서버가 같은 정보를 가지고있어야하기 때문에
+// 실제 정보대신 랜덤한 토큰을 쿠키로 보내줌, 그리고 서버에 값을 저장해서 서로연결됨을 인식함
+app.use(cookieParser('nodebirdsecret'));
+app.use(session({
+    saveUninitialized: false,
+    resave: false,
+    // 쿠키에 랜덤한 문자열을 보내준다햇는데
+    // secret이 해킹당하면 정보가 노출될 수 있음
+    // 그래서 꼼꼼히 숨겨둠
+    // secret: 'nodebirdsecret',
+    secret: process.env.COOKIE_SECRET,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get('/', (req, res) => {
     res.send('hellow express');

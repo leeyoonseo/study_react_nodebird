@@ -8,7 +8,6 @@ const passport = require('passport');
 
 // db 만든거
 const { User } = require('../models');
-const { noExtendRight, iRegexp } = require('sequelize/types/lib/operators');
 const router = express.Router();
 
 // // 로그인 전략
@@ -109,6 +108,16 @@ router.post('/', async (req, res, next) => { // POST /user/
         // next를 통해 에러를 보내면 한번에 처리함.(?)
         next(error); // status 500, 이건 서버에서 에러나는것이니까
     }
+});
+
+router.post('/user/logout', (req, res) => {
+    // 로그인한 정보
+    // 보통 게시글, 댓글쓸때 정보쓸 수 있음
+    console.log(req.user);
+
+    req.logout();
+    req.session.destroy();
+    res.send('OK');
 });
 
 module.exports = router;

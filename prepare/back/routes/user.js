@@ -14,6 +14,46 @@ const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
+// 새로고침할 때마다 보낼 요청 (로그인 유지하기 위해서)
+router.get('/', async (req, res, next) => {
+    try{
+        if(req.user){
+            // 여기서 데이터 가공하기위해 정보를 찾아온다.
+            const fullUserWithoutPassword = await User.findOne({
+                where: { id: req.user.id },
+                attributes: {
+                    exclude: [ 'password' ]
+                },
+
+                // 데이터 효율을 위해서 id만 가져온다.
+                include: [{ 
+                    model: Post ,
+                    attributes: [ 'id' ],
+                },{ 
+                    model: User,
+                    as: 'Followings',
+                    attributes: [ 'id' ],
+                },{ 
+                    model: User,
+                    as: 'Followers', 
+                    attributes: [ 'id' ],
+                }]
+            });
+
+            res.status(200).json(fullUserWithoutPassword);
+            
+        }else{
+
+            // 로그인안한 사용자일 경우 null
+            res.status(200).json(null);
+        }
+        
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,
 // req.body를 쓰기전에 app.js에서 선행작업을 해야함
@@ -100,13 +140,16 @@ router.post('/login', isNotLoggedIn, (req, res, next) => { // /user/login
                 // models/Post/ 에서 associate 확인, as썻으면 똑같이 as써야함
                 // sequelize가 자동으로 합쳐주는것 지원
                 include: [{ 
-                    model: Post 
+                    model: Post,
+                    attributes: [ 'id' ],
                 },{ 
                     model: User,
-                    as: 'Followings'
+                    as: 'Followings',
+                    attributes: [ 'id' ],
                 },{ 
                     model: User,
                     as: 'Followers', 
+                    attributes: [ 'id' ],
                 }]
             });
 

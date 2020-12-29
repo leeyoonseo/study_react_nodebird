@@ -3,11 +3,12 @@ import { all, fork, call, put, takeLatest, delay } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { 
+    LOAD_MY_INFO_REQUEST, LOAD_MY_INFO_SUCCESS, LOAD_MY_INFO_FAILURE, 
     FOLLOW_REQUEST, FOLLOW_SUCCESS, FOLLOW_FAILURE, 
     UNFOLLOW_REQUEST, UNFOLLOW_SUCCESS, UNFOLLOW_FAILURE, 
     LOG_IN_REQUEST, LOG_IN_SUCCESS, LOG_IN_FAILURE, 
     LOG_OUT_REQUEST, LOG_OUT_SUCCESS, LOG_OUT_FAILURE,
-    SIGN_UP_REQUEST, SIGN_UP_SUCCESS, SIGN_UP_FAILURE, 
+    SIGN_UP_REQUEST, SIGN_UP_SUCCESS, SIGN_UP_FAILURE,
 } from '../reducers/user';
 
 function loginAPI(data){
@@ -115,6 +116,28 @@ function* unFollow(action){
     }
 }
 
+function loadMyInfoAPI(){
+    // 쿠키로만 작업
+    // get, delete는 데이터가 없으므로 2번째 인자가 옵션자리
+    return axios.get('/user');
+}
+
+function* loadMyInfo(action){
+    try{
+        const result = yield call(loadMyInfoAPI, action.data);
+        yield put({
+            type: LOAD_MY_INFO_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: LOAD_MY_INFO_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
 function* watchFollow(){
     yield takeLatest(FOLLOW_REQUEST, follow);
 }
@@ -135,8 +158,13 @@ function* watchSignUp(){
     yield takeLatest(SIGN_UP_REQUEST, signUp);
 }
 
+function* watchLoadMyInfo(){
+    yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
+}
+
 export default function* userSaga(){
     yield all([
+        fork(watchLoadMyInfo),
         fork(watchFollow),
         fork(watchUnFollow),
         fork(watchLogIn),

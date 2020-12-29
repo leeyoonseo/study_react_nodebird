@@ -2,6 +2,9 @@
 import produce from 'immer';
 
 export const initialState = {
+    loadMyInfoLoading: false, // 팔로우 시도중
+    loadMyInfoDone: false,
+    loadMyInfoError: null,
     followLoading: false, // 팔로우 시도중
     followDone: false,
     followError: null,
@@ -25,29 +28,14 @@ export const initialState = {
     loginData: {},
 };
 
-/*
-export const loginAction = (data) => {
-    return (dispatch, getState) => {
-
-        const state = getState();
-
-        dispatch(loginRequestAction());
-
-        axios.post('/api/login')
-            .then((res) => {
-                dispatch(loginRequestAction(res.data));
-            })
-            .catch((err) => {
-                dispatch(loginFailureAction(err));
-            });
-    }
-}
-*/
-
 // 너무 길어지면 분리해도됨
 export const LOG_IN_REQUEST = 'LOG_IN_REQUEST';
 export const LOG_IN_SUCCESS = 'LOG_IN_SUCCESS';
 export const LOG_IN_FAILURE = 'LOG_IN_FAILURE';
+
+export const LOAD_MY_INFO_REQUEST = 'LOAD_MY_INFO_REQUEST';
+export const LOAD_MY_INFO_SUCCESS = 'LOAD_MY_INFO_SUCCESS';
+export const LOAD_MY_INFO_FAILURE = 'LOAD_MY_INFO_FAILURE';
 
 export const LOG_OUT_REQUEST = 'LOG_OUT_REQUEST';
 export const LOG_OUT_SUCCESS = 'LOG_OUT_SUCCESS';
@@ -88,6 +76,23 @@ export const logoutRequestAction = () => {
 
 const reducer = (state = initialState, action) => produce(state, (draft) => {
     switch(action.type){
+        case LOAD_MY_INFO_REQUEST:
+            draft.loadMyInfoLoading = true;
+            draft.loadMyInfoError = null;
+            draft.loadMyInfoDone = false;
+            break;
+
+        case LOAD_MY_INFO_SUCCESS: 
+            draft.loadMyInfoLoading = false;
+            draft.loadMyInfoDone = true;
+            draft.me = action.data;
+            break;
+
+        case LOAD_MY_INFO_FAILURE: 
+            draft.loadMyInfoLoading = false;
+            draft.loadMyInfoError = action.error;
+            break;
+
         case FOLLOW_REQUEST:
             draft.followLoading = true;
             draft.followError = null;

@@ -4,6 +4,7 @@ import AppLatout from "../components/AppLayout";
 import PostForm from "../components/PostForm";
 import PostCard from "../components/PostCard";
 import { LOAD_POSTS_REQUEST } from '../reducers/post';
+import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
 
 
 // AppLayout에 감싸지는 애들이 children이 됨...
@@ -13,6 +14,10 @@ const Home = () => {
     const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector(state => state.post);
 
     useEffect(() => {
+        dispatch({
+            type: LOAD_MY_INFO_REQUEST,
+        });
+
         dispatch({
             type: LOAD_POSTS_REQUEST,
         });

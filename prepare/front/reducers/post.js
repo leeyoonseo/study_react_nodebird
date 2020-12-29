@@ -78,26 +78,6 @@ export const addComment = (data) => ({
     data,
 });
 
-const dummyPost = (data) => ({
-    id: data.id,
-    content: data.content,
-    User: {
-        id: 1,
-        nickname: 'okayoon',
-    },
-    Images: [],
-    Comments: [],
-});
-
-const dummyComment = (data) => ({
-    id: shortId.generate(),
-    content: data,
-    User: {
-        id: 1,
-        nickname: 'okayoon'
-    }
-});
-
 // 데이터 흐름에 유의할 것
 // request -> saga -> reducer -> success -> view -> useEffect...
 
@@ -136,7 +116,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;        
 
         case ADD_POST_SUCCESS:
-            draft.mainPosts.unshift(dummyPost(action.data));
+            draft.mainPosts.unshift(action.data);
             draft.addPostLoading = false;
             draft.addPostDone = true;
             break;
@@ -191,8 +171,8 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             // };
 
             // immer 적용 후!!
-            const post = draft.mainPosts.find((v) => v.id === action.data.postId);
-            postComments.unshift(dummyComment(action.data.content));
+            const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+            postComments.unshift(action.data);
             draft.addCommentLoading = false;
             draft.addCommentDone = true;
             break;

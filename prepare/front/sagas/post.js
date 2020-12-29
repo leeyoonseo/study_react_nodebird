@@ -37,28 +37,23 @@ function* loadPosts(action){
 
 
 function addPostAPI(data){
-    return axios.post('/api/post', data);
+    return axios.post('/post', { content: data });
 }
 
 function* addPost(action){
     // user-post reducer에서 직접적 통신이 불가능? 힘드니
     // user reducer는 post saga에서 조작가능하니 여기서 작업
     try{
-        const id = shortId.generate();
-        // const result = yield call(addPostAPI, action.data);
-        yield delay(1000);
+        const result = yield call(addPostAPI, action.data);
         
         yield put({
             type: ADD_POST_SUCCESS,
-            data: {
-                id,
-                content: action.data,
-            }
+            data: result.data,
         });
 
         yield put({
             type: ADD_POST_TO_ME,
-            data: id,
+            data: result.data.id,
         })
 
     } catch(err){
@@ -103,17 +98,19 @@ function* removePost(action){
 }
 
 function addCommentAPI(data){
-    return axios.post(`/api/post/${data.postId}/comment`, data);
+    // 주소는 약속... 아무렇게나 만들어도되나 의미가있는게 보통
+    // 따라서 id를 사용해서 작업
+    return axios.post(`/post/${data.postId}/comment`, data);
 }
 
 function* addComment(action){
     try{
-        // const result = yield call(addCommentAPI, action.data);
+        const result = yield call(addCommentAPI, action.data);
         
         yield delay(1000);
         yield put({
             type: ADD_COMMENT_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
 
     } catch(err){

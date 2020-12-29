@@ -26,7 +26,7 @@ const CommentForm = ({ post }) => {
                 postId: post.id, 
                 userId: id 
             }
-        })
+        });
     }, [commentText, id]);
 
     return(

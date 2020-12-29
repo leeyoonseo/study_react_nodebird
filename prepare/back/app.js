@@ -69,8 +69,13 @@ app.get('/posts', (req, res) => {
 // cors 설정
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
 app.use(cors({
-    origin: '*',
-    credentials: false, // 나중에 true로해야함.
+    // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
+    // origin: 'http://localhost:3060',
+    origin: true,
+
+    // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
+    // 쿠키 전달을 위해 true로 해야함
+    credentials: true,
 }));
 
 // 중복되는 것들을 인수로 넣어줌으로써 postRouter에는 

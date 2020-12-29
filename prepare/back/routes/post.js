@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { Post } = require('../models');
+const { Post, Image, Comment } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 // 주소가 겹치면 use에서 인수를 먼저 넘긴다.
@@ -17,8 +17,19 @@ router.post('/', isLoggedIn, async (req, res) => {
             UserId: req.user.id,
         });
 
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            include: [{
+                model: Image,
+            },{
+                model: Comment,
+            },{
+                model: User,
+            }]
+        })
+
         // 프론트로 돌려줌
-        res.status(200).json(post);
+        res.status(200).json(fullPost);
 
     }catch(error){
         console.error(error);

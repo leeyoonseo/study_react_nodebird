@@ -72,18 +72,6 @@ export const UNFOLLOW_FAILURE = 'UNFOLLOW_FAILURE';
 export const ADD_POST_TO_ME = 'ADD_POST_TO_ME';
 export const REMOVE_POST_OF_ME = 'REMOVE_POST_OF_ME';
 
-// const dummyUser = (data) => ({
-//     ...data,
-//     nickname: 'okayoon',
-//     id: 1,
-//     // post의 id값과 연동되어야함
-//     Posts: [{
-//         id: 1,
-//     }],
-//     Followings: [],
-//     Followers: [],
-// });
-
 // success와 failure액션은 saga가 호출하기 때문에 우리가 액션을 만들 필요는 없다
 export const loginRequestAction = (data) => {
     return{

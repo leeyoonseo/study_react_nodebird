@@ -25,7 +25,7 @@ const LoginForm = () => {
     const { logInLoading } = useSelector((state) => state.user);
     
     const onSubmitForm = useCallback(() => {
-        dispatch(loginRequestAction(email, password));
+        dispatch(loginRequestAction({ email, password }));
     }, [email, password]);
 
     return(
@@ -46,6 +46,7 @@ const LoginForm = () => {
                 <label htmlFor="user-password">비밀번호</label>
                 <br />
                 <Input 
+                    type="password"
                     name="user-password" 
                     value={password} 
                     onChange={onChangePassword} 

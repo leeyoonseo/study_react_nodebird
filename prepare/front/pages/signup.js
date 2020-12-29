@@ -8,7 +8,6 @@ import AppLayout from '../components/AppLayout';
 import styled from 'styled-components';
 import { Form, Input, Checkbox, Button } from 'antd';
 import { SIGN_UP_REQUEST } from '../reducers/user';
-import router from '../../back/routes/user';
 
 const ErrorMessage = styled.div`
     color: red;

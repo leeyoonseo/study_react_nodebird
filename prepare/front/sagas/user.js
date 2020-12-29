@@ -11,15 +11,12 @@ import {
 } from '../reducers/user';
 
 function loginAPI(data){
-    // 백엔드 주소
-    // 중복되는 주소들 제거
     return axios.post('/user/login', data);
 }
 
 function* login(action){
     try{
         const result = yield call(loginAPI, action.data);
-
         yield put({
             type: LOG_IN_SUCCESS,
             data: result.data,

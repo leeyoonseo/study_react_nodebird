@@ -19,7 +19,7 @@ module.exports = () => {
         // try, catch
         try{
             const user = await User.findOne({
-                where: { email },
+                where: { email }
             });
     
             if(!user){

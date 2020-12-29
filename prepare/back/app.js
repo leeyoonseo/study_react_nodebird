@@ -1,14 +1,18 @@
 
-const express = require('express')
+const express = require('express');
+
 // 라우터 분리
 const postRouter = require('./routes/post');
-const userRouter = require('./routes/user')
+const userRouter = require('./routes/user');
+
 // db
-const db = require('./models')
+const db = require('./models');
+
 // cors
 const cors = require('cors');
 const passportConfig = require('./passport');
-const passport = require('passport')
+const passport = require('passport');
+
 // session
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -73,6 +77,11 @@ app.use(cors({
 // prefix로 /post/ 가 붙음
 app.use('/post', postRouter);
 app.use('/user', userRouter);
+
+// 내부적으로 에러처리 미들웨어가 동작함
+// 이런식으로 직접 에러처리 미들웨어를 만들 수 있다.
+// 보통 에러를 특별하게 처리할때 사용 (에러페이지, 에러데이터가공등...)
+// app.use((err, req, res, next) => { //... });
 
 app.listen(3065, () => {
     console.log('서버 실행 중...');

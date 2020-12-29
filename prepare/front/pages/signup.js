@@ -15,8 +15,7 @@ const ErrorMessage = styled.div`
 
 const Signup = () => {
     const dispatch = useDispatch();
-    const { me } = useSelector((state) => state.user);
-    const { signUpLoading, signUpDone, signUpError } = useSelector((state) => state.user);
+    const { signUpLoading, signUpDone, signUpError, me } = useSelector((state) => state.user);
 
     // 프로필에 있다가 로그인할때
     // 리다이렉트 처리

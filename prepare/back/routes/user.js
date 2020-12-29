@@ -1,15 +1,23 @@
 const express = require('express');
+
 // 비밀번호 암호화
 const bcrypt = require('bcrypt');
+
 // 로그인 전략
 const passport = require('passport');
+
 // db 만든거
 const { User, Post } = require('../models');
+
+// 미들웨어
+const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+
 const router = express.Router();
+
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,
 // req.body를 쓰기전에 app.js에서 선행작업을 해야함
-router.post('/', async (req, res, next) => { // POST /user/
+router.post('/', isNotLoggedIn, async (req, res, next) => { // POST /user/
     try{
         // 중복되는지 찾기
         // 비동기인지 아닌지모르겠으면 라이브러리 공식문서를 통해 확인할 것
@@ -52,9 +60,13 @@ router.post('/', async (req, res, next) => { // POST /user/
         next(error); // status 500, 이건 서버에서 에러나는것이니까
     }
 });
+
 // 위의 함수를 미들웨어 확장하는 방법으로 변경하여 next에 에러를 전달하도록 수정
 // 미들웨어를 확장하는 방식
-router.post('/login', (req, res, next) => { // /user/login
+router.post('/login', isNotLoggedIn, (req, res, next) => { // /user/login
+    // isNotLoggedIn을 해당 함수 안에서 작업해도 되나
+    // 중복되는 코드들이 생기기 때문에 커스텀으로 생성함
+    
     passport.authenticate('local', (err, user, info) => {
         if(err){
             console.error(err);
@@ -104,10 +116,9 @@ router.post('/login', (req, res, next) => { // /user/login
     })(req, res, next);
 });
 
-router.post('/logout', (req, res) => {
+router.post('/logout', isLoggedIn, (req, res) => {
     // 로그인한 정보
     // 보통 게시글, 댓글쓸때 정보쓸 수 있음
-    console.log(req.user);
     req.logout();
     req.session.destroy();
     res.send('OK');

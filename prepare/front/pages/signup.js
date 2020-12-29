@@ -15,7 +15,17 @@ const ErrorMessage = styled.div`
 
 const Signup = () => {
     const dispatch = useDispatch();
+    const { me } = useSelector((state) => state.user);
     const { signUpLoading, signUpDone, signUpError } = useSelector((state) => state.user);
+
+    // 프로필에 있다가 로그인할때
+    // 리다이렉트 처리
+    useEffect(() => {
+        if(!(me && me.id)){
+            // push는 뒤로가기가 가능, replace는 뒤로가기안됨
+            Router.replace('/');
+        }
+    }, [ me && me.id]);
 
     useEffect(() => {
         if(signUpDone){

@@ -1,5 +1,5 @@
 // useMemo를 통해 styled 처리
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useInput from '../hooks/useInput';
 
@@ -22,12 +22,19 @@ const LoginForm = () => {
     const dispatch = useDispatch();
     const [email, onChangeEmail] = useInput('');
     const [password, onChangePassword] = useInput('');
-    const { logInLoading } = useSelector((state) => state.user);
+    const { logInLoading, loginError } = useSelector((state) => state.user);
     
+    // 로그인 실패 시
+    useEffect(() => {
+        if(loginError){
+            alert(loginError);
+        }
+    }, [ loginError ]);
+
     const onSubmitForm = useCallback(() => {
         dispatch(loginRequestAction({ email, password }));
     }, [email, password]);
-
+    
     return(
         // onFinish에는 e.preventDefault가 자동으로 적용되어있다.
         <FormWrapper onFinish={onSubmitForm}>

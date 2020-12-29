@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 // 로그인 전략
 const passport = require('passport');
 // db 만든거
-const { User } = require('../models');
+const { User, Post } = require('../models');
 const router = express.Router();
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,
@@ -72,8 +72,34 @@ router.post('/login', (req, res, next) => { // /user/login
                 console.error(loginErr);
                 return next(loginErr);
             }
+
+            // 여기서 데이터 가공하기위해 정보를 찾아온다.
+            const fullUserWithoutPassword = await User.findOne({
+                where: { id: user.id },
+                // 이렇게 하면 원하는 것만 뽑아서 가져올 수 있다.
+                // attributes: [ 'id', 'nickname', 'email'],
+
+                // 이렇게 하면 원하지 않는 것만 제외하고 가져올 수 있다.
+                attributes: {
+                    exclude: [ 'password' ]
+                },
+                
+                // hasMany라서 model: Post가 복수형이 되어 me.Posts가 된다.
+                // models/Post/ 에서 associate 확인, as썻으면 똑같이 as써야함
+                // sequelize가 자동으로 합쳐주는것 지원
+                include: [{ 
+                    model: Post 
+                },{ 
+                    model: User,
+                    as: 'Followings'
+                },{ 
+                    model: User,
+                    as: 'Followers', 
+                }]
+            });
+
             // 사용자 정보를 프론트로
-            return res.json(user);
+            return res.status(200).json(fullUserWithoutPassword);
         });
     })(req, res, next);
 });

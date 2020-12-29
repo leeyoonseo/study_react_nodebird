@@ -31,16 +31,14 @@ function* login(action){
 }
 
 function logoutAPI(){
-    return axios.post('/logout');
+    return axios.post('/user/logout');
 }
 
-function* logout(action){
+function* logout(){
     try{
-        // const result = yield call(logoutAPI);
-        yield delay(1000);
+        yield call(logoutAPI);
         yield put({
             type: LOG_OUT_SUCCESS,
-            data: action.data,
         });
 
     } catch(err){

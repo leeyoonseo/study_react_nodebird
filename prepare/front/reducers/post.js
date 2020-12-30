@@ -172,7 +172,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
 
             // immer 적용 후!!
             const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
-            postComments.unshift(action.data);
+            post.Comments.unshift(action.data);
             draft.addCommentLoading = false;
             draft.addCommentDone = true;
             break;

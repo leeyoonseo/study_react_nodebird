@@ -93,7 +93,7 @@ const PostCard = ({ post }) => {
 
             {commentFormOpend && (
                 <div>
-                    <CommentForm post={post}/>
+                    { id && <CommentForm post={post}/> }
                     <List 
                         header={`${post.Comments.length}개의 댓글`}
                         itemLayout="horizontal"
@@ -120,12 +120,12 @@ PostCard.propTypes = {
 
     // shape를 써서 내부 prop들을 정의할 수 있다.
     post: PropTypes.shape({
-        id: PropTypes.string,
+        id: PropTypes.number,
         
         // 이런것도 shape를 사용해 구체적으로 쓰면 좋다.
         User: PropTypes.object,
         content: PropTypes.string,
-        createAt: PropTypes.object,
+        createAt: PropTypes.string,
         
         // 객체들의 배열이란 뜻
         Comments: PropTypes.arrayOf(PropTypes.object),

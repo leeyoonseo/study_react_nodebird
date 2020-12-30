@@ -3,6 +3,10 @@ const express = require('express');
 
 // 라우터 분리
 const postRouter = require('./routes/post');
+
+// 왜 post가 있는데 posts가 있느냐?
+// 개발자마다 다름.. 걍 스타일임.. 단수 복수를 구분하려고...
+const postsRouter = require('./routes/posts');
 const userRouter = require('./routes/user');
 
 // db
@@ -20,6 +24,8 @@ const cookieParser = require('cookie-parser');
 // .env
 const dotenv = require('dotenv');
 
+const morgan = require('morgan');
+
 dotenv.config();
 
 const app = express();
@@ -33,6 +39,11 @@ db.sequelize.sync()
     .catch(console.error);
 
 passportConfig();
+
+// 서버에 응답, 요청 기록하기
+// 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
+// 디버깅 용이
+app.use(morgan('dev'));
 
 // 다른 라우터보다 위에 있어야함 (미들웨어는 순서대로 실행되기 때문에 라우터 실행전에 선언되어야함)
 // json, urlencoded는 프론트에서 데이터 넘기면 해석해서 req.body안에 넣어주는 역할
@@ -58,14 +69,6 @@ app.get('/', (req, res) => {
     res.send('hellow express');
 });
 
-app.get('/posts', (req, res) => {
-    res.json([
-        { id: 1, content: 'hello1'},
-        { id: 2, content: 'hello2'},
-        { id: 3, content: 'hello3'},
-    ]);
-});
-
 // cors 설정
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
 app.use(cors({
@@ -81,6 +84,7 @@ app.use(cors({
 // 중복되는 것들을 인수로 넣어줌으로써 postRouter에는 
 // prefix로 /post/ 가 붙음
 app.use('/post', postRouter);
+app.use('/posts', postsRouter);
 app.use('/user', userRouter);
 
 // 내부적으로 에러처리 미들웨어가 동작함

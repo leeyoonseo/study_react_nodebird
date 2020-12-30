@@ -23,8 +23,13 @@ router.post('/', isLoggedIn, async (req, res) => {
                 model: Image,
             },{
                 model: Comment,
+                include: [{
+                    model: User,
+                attributes: [ 'id', 'nickname' ],
+            }],
             },{
                 model: User,
+                attributes: [ 'id', 'nickname' ],
             }]
         })
 
@@ -53,14 +58,22 @@ router.post('/:postId/comment', isLoggedIn, async (req, res) => {
         }
 
         const comment = await Comment.create({
-            contet: req.body.content,
+            content: req.body.content,
 
             // req.body로 접근가능하기도 하나 params가 좀더 명확
-            PostId: req.params.postId,
+            PostId: parseInt(req.params.postId, 10),
             UserId: req.user.id,
         });
 
-        res.status(200).json(comment);
+        const fullComment = await Comment.findOne({
+            whehe: { id: comment.id }, 
+            include: [{
+                model: User,
+                attributes: [ 'id', 'nickname' ],
+            }]
+        })
+
+        res.status(200).json(fullComment);
 
     }catch(error){
         console.error(error);

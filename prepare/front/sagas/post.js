@@ -1,30 +1,26 @@
 import { all, fork, call, put, takeLatest, delay, throttle } from 'redux-saga/effects';
 import axios from 'axios';
 
-import shortId from 'shortid';
-
 import {
     LOAD_POSTS_REQUEST, LOAD_POSTS_SUCCESS, LOAD_POSTS_FAILURE,
     ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_POST_FAILURE,
     REMOVE_POST_REQUEST, REMOVE_POST_SUCCESS, REMOVE_POST_FAILURE,
-    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, generateDummyPost,
+    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE,
 
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
 
 function loadPostsAPI(data){
-    return axios.post('/api/posts', data);
+    return axios.get('/posts', data);
 }
 
 function* loadPosts(action){
     try{
-        // const result = yield call(loadPostsAPI, action.data);
-        yield delay(1000);
-        const id = shortId.generate();
+        const result = yield call(loadPostsAPI, action.data);
         
         yield put({
             type: LOAD_POSTS_SUCCESS,
-            data: generateDummyPost(10),
+            data: result.data,
         });
     } catch(err){
         yield put({
@@ -33,8 +29,6 @@ function* loadPosts(action){
         });
     }
 }
-
-
 
 function addPostAPI(data){
     return axios.post('/post', { content: data });
@@ -65,22 +59,16 @@ function* addPost(action){
 }
 
 function removePostAPI(data){
-    return axios.delete('/api/post', data);
+    return axios.delete('/post', data);
 }
 
 function* removePost(action){
-    // user-post reducer에서 직접적 통신이 불가능? 힘드니
-    // user reducer는 post saga에서 조작가능하니 여기서 작업
     try{
-        const id = shortId.generate();
-        // const result = yield call(addPostAPI, action.data);
-        yield delay(1000);
+        const result = yield call(removePostAPI, action.data);
         
-        // post, user reducer를 한방에 바꿀수 없어서 put 두번
-        // post reducer 상태
         yield put({
             type: REMOVE_POST_SUCCESS,
-            data: action.data,
+            data: result.data,
         });
 
         // user reducer 상태
@@ -107,7 +95,6 @@ function* addComment(action){
     try{
         const result = yield call(addCommentAPI, action.data);
         
-        yield delay(1000);
         yield put({
             type: ADD_COMMENT_SUCCESS,
             data: result.data,

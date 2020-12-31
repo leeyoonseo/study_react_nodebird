@@ -44,6 +44,11 @@ router.get('/', async (req, res, next) => {
                     model: User,
                     attributes: [ 'id', 'nickname' ],
                 }],
+            },{
+                model: User, // 좋아요 누른사람
+                // 이것을 넣어야 post.Likers가 생성됨
+                as: 'Likers',
+                attributes: [ 'id' ],
             }],
 
             // 특성 작성자 예시

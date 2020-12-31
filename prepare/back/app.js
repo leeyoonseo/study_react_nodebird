@@ -65,9 +65,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session())
-app.get('/', (req, res) => {
-    res.send('hellow express');
-});
 
 // cors 설정
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함

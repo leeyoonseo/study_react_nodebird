@@ -1,6 +1,3 @@
-// 로그인했는지 안했는지 검사하는 미들웨어
-// app.js에서 use로 사용하는애들은 미들웨어....
-
 exports.isLoggedIn = (req, res, next) => {
     // passport에서 isAuthenticated 메서드 제공
     if(req.isAuthenticated()){

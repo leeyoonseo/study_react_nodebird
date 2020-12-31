@@ -14,6 +14,12 @@ export const initialState = {
     mainPosts: [],
     imagePaths: [],
     hasMorePosts: true,
+    likePostLoading: false,
+    likePostDone: false,
+    likePostError: null,
+    unlikePostLoading: false,
+    unlikePostDone: false,
+    unlikePostError: null,
     loadPostsLoading: false,
     loadPostsDone: false,
     loadPostsError: null,
@@ -68,6 +74,14 @@ export const REMOVE_POST_REQUEST = 'REMOVE_POST_REQUEST';
 export const REMOVE_POST_SUCCESS = 'REMOVE_POST_SUCCESS';
 export const REMOVE_POST_FAILURE = 'REMOVE_POST_FAILURE';
 
+export const UNLIKE_POST_REQUEST = 'UNLIKE_POST_REQUEST';
+export const UNLIKE_POST_SUCCESS = 'UNLIKE_POST_SUCCESS';
+export const UNLIKE_POST_FAILURE = 'UNLIKE_POST_FAILURE';
+
+export const LIKE_POST_REQUEST = 'LIKE_POST_REQUEST';
+export const LIKE_POST_SUCCESS = 'LIKE_POST_SUCCESS';
+export const LIKE_POST_FAILURE = 'LIKE_POST_FAILURE';
+
 export const addPost = (data) => ({
     type : ADD_POST_REQUEST,
     data,
@@ -80,30 +94,60 @@ export const addComment = (data) => ({
 
 // 데이터 흐름에 유의할 것
 // request -> saga -> reducer -> success -> view -> useEffect...
-
-// reducer는 이전상태를 액션을 통해 다음 상태로 만들어내는 함수
-// 단 불변성은 지키면서!!
-// immer 추가!
-    // 불변성은 지키면서?를 버려도된다.
-    // draft라는 state를..
-    // draft는 불변성 상관없이 작업해도되는데, immer가 알아서
-    // state를 불변성 상태로 만들어주기때문에!!
-    // *단 state는 건들면 안됨!!!
 const reducer = (state = initialState, action) => produce(state, (draft) =>{
     switch(action.type){
+        case UNLIKE_POST_REQUEST: 
+            draft.unlikePostLoading = true;
+            draft.unlikePostDone = false;
+            draft.unlikePostError = null;   
+            break;            
+            
+        case UNLIKE_POST_SUCCESS: {
+            const post = draft.mainPosts.find((v) => v.id === action.data.PostId );
+            post.Likers = post.Likers.filter((v) => v.id !== action.data.UserId);
+            draft.unlikePostLoading = false;
+            draft.unlikePostDone = true;
+            break;
+        }
+
+        case UNLIKE_POST_FAILURE:
+            draft.unlikePostLoading = false;
+            draft.unlikePostError = action.error;
+            break;
+
+        case LIKE_POST_REQUEST: 
+            draft.likePostLoading = true;
+            draft.likePostDone = false;
+            draft.likePostError = null;   
+            break;            
+            
+        case LIKE_POST_SUCCESS: {
+            const post = draft.mainPosts.find((v) => v.id === action.data.PostId );
+            post.Likers.push({ id: action.data.UserId });
+            draft.likePostLoading = false;
+            draft.likePostDone = true;
+            break;
+        }
+
+        case LIKE_POST_FAILURE:
+            draft.likePostLoading = false;
+            draft.likePostError = action.error;
+            break;
+
         case LOAD_POSTS_REQUEST:
             draft.loadPostsLoading = true;
             draft.loadPostsDone = false;
             draft.loadPostsError = null;   
             break;        
 
-        case LOAD_POSTS_SUCCESS:
+        case LOAD_POSTS_SUCCESS: {
             draft.mainPosts = action.data.concat(draft.mainPosts);
             draft.loadPostsLoading = false;
             draft.loadPostsDone = true;
             draft.hasMorePosts = draft.mainPosts.length < 50;
             break;
-
+        }
+            
         case LOAD_POSTS_FAILURE:
             draft.loadPostsLoading = false;
             draft.loadPostsError = action.error;
@@ -149,38 +193,18 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             draft.addCommentError = null;    
             break;            
             
-        case ADD_COMMENT_SUCCESS: 
-            // immer 적용 전!!
-            // const postIndex = state.mainPosts.findIndex((v) => v.id === action.data.postId);
-            // const post = state.mainPosts[postIndex];
-            // const Comments = [
-            //     dummyComment(action.data.content),
-            //     ...post.Comments
-            // ];
-            // const mainPosts = [ ...state.mainPosts ];
-            // mainPosts[postIndex] = {
-            //     ...post,
-            //     Comments
-            // };
-
-            // return{
-            //     ...state,
-            //     mainPosts,
-            //     addCommentLoading: false,
-            //     addCommentDone: true,
-            // };
-
-            // immer 적용 후!!
-            const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+        case ADD_COMMENT_SUCCESS: {
+            const post = drafactiont.mainPosts.find((v) => v.id === action.data.PostId);
             post.Comments.unshift(action.data);
             draft.addCommentLoading = false;
             draft.addCommentDone = true;
             break;
+        }
 
         case ADD_COMMENT_FAILURE:
             draft.addCommentLoading = false;
             draft.addCommentError = action.error;
-            break;
+            break;        
     }
 });
 

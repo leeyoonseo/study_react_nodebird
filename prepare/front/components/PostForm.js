@@ -16,17 +16,17 @@ const PostForm = () => {
         if(addPostDone){
             setText('');
         }
-    }, [addPostDone]);
+    }, [ addPostDone ]);
 
     const onSubmit = useCallback(() => {
         dispatch(addPost(text));
-        setText('');
-    }, [text]);
+        //setText('');
+    }, [ text ]);
 
     const imageInput = useRef();
     const onClickImageUpload = useCallback(() => {
         imageInput.current.click();
-    }, [imageInput.current]);
+    }, [ imageInput.current ]);
 
     return(
         <Form 

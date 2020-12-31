@@ -8,25 +8,31 @@ import CommentForm from './CommentForm';
 import PostImages from './PostImages';
 import PostCardContent from './PostCardContent';
 import FollowButton from './FollowButton';
-import { REMOVE_POST_REQUEST } from '../reducers/post';
+import { 
+    LIKE_POST_REQUEST,
+    UNLIKE_POST_REQUEST,
+    REMOVE_POST_REQUEST,
+} from '../reducers/post';
 
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
-    const [liked, setLiked] = useState(false);
     const [commentFormOpend, setCommentFormOpend] = useState(false);
+    
+    const onLike = useCallback(() => {
+        dispatch({
+            type: LIKE_POST_REQUEST,
+            data: post.id,
+        });
+    }, []);
 
-
-    // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
-    // const { me } = useSelector((state) => state.user);
-    // const id = me?.id;
-    // 아니면 이렇게 한번에 해결
-    const id = useSelector((state) => state.user.me?.id);
-
-    const onToggleLiked = useCallback(() => {
-        // 토글은 prev를 사용하면 쉽다.
-        setLiked((prev) => !prev);
+    const onUnlike = useCallback(() => {
+        console.log('onUnlike');
+        dispatch({
+            type: UNLIKE_POST_REQUEST,
+            data: post.id,
+        });
     }, []);
 
     const onToggleComment = useCallback(() => {
@@ -40,6 +46,13 @@ const PostCard = ({ post }) => {
         })    
     }, []);
 
+    // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
+    // const { me } = useSelector((state) => state.user);
+    // const id = me?.id;
+    // 아니면 이렇게 한번에 해결
+    const id = useSelector((state) => state.user.me?.id);
+    const liked = post.Likers.find((v) => v.id === id);
+
     return(
         <div style={{ marginBottm: 20 }}>
             <Card
@@ -50,12 +63,12 @@ const PostCard = ({ post }) => {
                     liked 
                         ? <HeartTwoTone 
                                 twoToneColor="#eb2f96" 
-                                onClick={onToggleLiked}
+                                onClick={onUnlike}
                                 key="heart" 
                         />
                         : <HeartOutlined 
                             key="heart" 
-                            onClick={onToggleLiked}
+                            onClick={onLike}
                         />, 
                     <MessageOutlined 
                         key="comment" 
@@ -130,6 +143,7 @@ PostCard.propTypes = {
         // 객체들의 배열이란 뜻
         Comments: PropTypes.arrayOf(PropTypes.object),
         Images: PropTypes.arrayOf(PropTypes.object),
+        Likers: PropTypes.arrayOf(PropTypes.object),
     }).isRequired,
 };
 

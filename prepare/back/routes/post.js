@@ -1,19 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const { Post, Image, Comment } = require('../models');
+const { Post, Image, Comment, User } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
-// 주소가 겹치면 use에서 인수를 먼저 넘긴다.
-// prefix가 될 수 있도록
-router.post('/', isLoggedIn, async (req, res) => {
+router.post('/', isLoggedIn, async (req, res, next) => {
     try{
         const post = await Post.create({
             content: req.body.content,
-
-            // passport 가 실행되면 id를 저장했다가
-            // 사용자 정보를 저장해서 reqID를 만들기때문에?
-            // userID를 들고댕김?
             UserId: req.user.id,
         });
 
@@ -24,17 +18,21 @@ router.post('/', isLoggedIn, async (req, res) => {
             },{
                 model: Comment,
                 include: [{
-                    model: User,
-                attributes: [ 'id', 'nickname' ],
-            }],
+                    model: User, // 댓글 작성자
+                    attributes: [ 'id', 'nickname' ],
+                }]
             },{
-                model: User,
+                model: User, // 게시글 작성자
                 attributes: [ 'id', 'nickname' ],
+            }, {
+                model: User, // 좋아요 누른사람
+                // 이것을 넣어야 post.Likers가 생성됨
+                as: 'Likers',
+                attributes: [ 'id' ],
             }]
         })
 
-        // 프론트로 돌려줌
-        res.status(200).json(fullPost);
+        res.status(201).json(fullPost);
 
     }catch(error){
         console.error(error);
@@ -43,7 +41,7 @@ router.post('/', isLoggedIn, async (req, res) => {
 });
 
 // postId 파라미터
-router.post('/:postId/comment', isLoggedIn, async (req, res) => {
+router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
     try{
 
         // 프론트, 브라우저는 믿을게 못되서 철저히 검사해서
@@ -73,7 +71,7 @@ router.post('/:postId/comment', isLoggedIn, async (req, res) => {
             }]
         })
 
-        res.status(200).json(fullComment);
+        res.status(201).json(fullComment);
 
     }catch(error){
         console.error(error);
@@ -81,9 +79,55 @@ router.post('/:postId/comment', isLoggedIn, async (req, res) => {
     }
 });
 
-router.delete('/', (req, res) => {
-    res.json({ id:1, content: 'hello' });
+router.patch('/:postId/like', async (req, res, next) => {
+    try{
+        const post = await Post.findOne({
+            where: { id: req.params.postId }
+        });
 
+        if(!post){
+            return res.status(403),send('게시글이 존재하지 않습니다.');
+        }
+
+        // 모델에서 belongsToMany as...썼을때 
+        // 이때 Post.addLikes 같은 관계 메서드가 자동으로 생긴다.(sequelize에서)
+        await post.addLikers(req.user.id);
+        res.json({ 
+            PostId: post.id, 
+            UserId: req.user.id 
+        });
+
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
 });
+
+router.delete('/:postId/like', async (req, res, next) => {
+    try{
+        const post = await Post.findOne({
+            where: { id: req.params.postId }
+        });
+
+        if(!post){
+            return res.status(403),send('게시글이 존재하지 않습니다.');
+        }
+
+        // mysql로도 할수있으니 공식문서보도록
+        await post.removeLikers(req.user.id);
+        res.json({ 
+            PostId: post.id, 
+            UserId: req.user.id 
+        });
+        
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+// router.delete('/', (req, res) => {
+//     res.json({ id:1, content: 'hello' });
+// });
 
 module.exports = router;

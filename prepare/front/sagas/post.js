@@ -2,6 +2,8 @@ import { all, fork, call, put, takeLatest, delay, throttle } from 'redux-saga/ef
 import axios from 'axios';
 
 import {
+    UNLIKE_POST_REQUEST, UNLIKE_POST_SUCCESS, UNLIKE_POST_FAILURE,
+    LIKE_POST_REQUEST, LIKE_POST_SUCCESS, LIKE_POST_FAILURE,
     LOAD_POSTS_REQUEST, LOAD_POSTS_SUCCESS, LOAD_POSTS_FAILURE,
     ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_POST_FAILURE,
     REMOVE_POST_REQUEST, REMOVE_POST_SUCCESS, REMOVE_POST_FAILURE,
@@ -35,11 +37,8 @@ function addPostAPI(data){
 }
 
 function* addPost(action){
-    // user-post reducer에서 직접적 통신이 불가능? 힘드니
-    // user reducer는 post saga에서 조작가능하니 여기서 작업
     try{
         const result = yield call(addPostAPI, action.data);
-        
         yield put({
             type: ADD_POST_SUCCESS,
             data: result.data,
@@ -108,6 +107,53 @@ function* addComment(action){
     }
 }
 
+function unlikePostAPI(data){
+    // 일부분 수정이므로 patch 사용
+    return axios.delete(`/post/${data}/like`);
+    // 여러가지 방법이 있음, 약속에 따라 정할 것
+    //return axios.patch(`/post/${data}/unlike`);
+}
+
+function* unlikePost(action){
+    try{
+        const result = yield call(unlikePostAPI, action.data);
+        
+        yield put({
+            type: UNLIKE_POST_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: UNLIKE_POST_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+function likePostAPI(data){
+    // 일부분 수정이므로 patch 사용
+    return axios.patch(`/post/${data}/like`);
+}
+
+function* likePost(action){
+    console.log('action', action.data);
+    try{
+        const result = yield call(likePostAPI, action.data);
+        
+        yield put({
+            type: LIKE_POST_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: LIKE_POST_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
 function* watchLoadPosts(){
     // throttle로 scroll 이벤트 여러번 방지
     // throttle이 5초를 지켜주지만, 기존 요청을 취소하지않음
@@ -128,8 +174,18 @@ function* watchAddComment(){
     yield takeLatest(ADD_COMMENT_REQUEST, addComment);
 }
 
+function* watchUnlikePost(){
+    yield takeLatest(UNLIKE_POST_REQUEST, unlikePost);
+}
+
+function* watchLikePost(){
+    yield takeLatest(LIKE_POST_REQUEST, likePost);
+}
+
 export default function* postSaga(){
     yield all([
+        fork(watchUnlikePost),
+        fork(watchLikePost),
         fork(watchAddPost),
         fork(watchLoadPosts),
         fork(watchRemovePost),

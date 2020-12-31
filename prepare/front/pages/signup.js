@@ -7,7 +7,7 @@ import AppLayout from '../components/AppLayout';
 
 import styled from 'styled-components';
 import { Form, Input, Checkbox, Button } from 'antd';
-import { SIGN_UP_REQUEST } from '../reducers/user';
+import { SIGN_UP_REQUEST, LOAD_MY_INFO_REQUEST } from '../reducers/user';
 
 const ErrorMessage = styled.div`
     color: red;
@@ -17,11 +17,20 @@ const Signup = () => {
     const dispatch = useDispatch();
     const { signUpLoading, signUpDone, signUpError, me } = useSelector((state) => state.user);
 
+    // useEffect(() => {
+    //     dispatch({
+    //         type: LOAD_MY_INFO_REQUEST,
+    //     });
+    // }, []);
+
     // 프로필에 있다가 로그인할때
     // 리다이렉트 처리
     useEffect(() => {
-        if(!(me && me.id)){
-            // push는 뒤로가기가 가능, replace는 뒤로가기안됨
+
+        // TODO 이거 어케 처리?
+        if(me && me.id){
+        console.log('me',me);
+        // push는 뒤로가기가 가능, replace는 뒤로가기안됨
             Router.replace('/');
         }
     }, [ me && me.id]);

@@ -5,11 +5,10 @@ import { Button } from 'antd';
 import PropTypes from 'prop-types';
 import { FOLLOW_REQUEST, UNFOLLOW_REQUEST } from '../reducers/user';
 
-
-
 const FollowButton = ({ post }) => {
     const dispatch = useDispatch();
-    const { me, followLoading, unFollowLoading } = useSelector((state) => state.user);
+    const { me, followLoading, unFollowLoading } = useSelector((state) => state.user);    
+
     // following 여부
     const isFollowing = me?.Followings.find((v) => v.id === post.User.id);
     
@@ -27,6 +26,11 @@ const FollowButton = ({ post }) => {
         }
 
     }, [ isFollowing ]);
+
+    // hooks 보다는 아래에 넣어줘야 에러가 안남
+    if(post.User.id === me.id){
+        return null;
+    }
 
     return (
         <Button

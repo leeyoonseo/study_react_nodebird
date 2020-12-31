@@ -8,7 +8,8 @@ import {
     UNFOLLOW_REQUEST, UNFOLLOW_SUCCESS, UNFOLLOW_FAILURE, 
     LOG_IN_REQUEST, LOG_IN_SUCCESS, LOG_IN_FAILURE, 
     LOG_OUT_REQUEST, LOG_OUT_SUCCESS, LOG_OUT_FAILURE,
-    SIGN_UP_REQUEST, SIGN_UP_SUCCESS, SIGN_UP_FAILURE,
+    SIGN_UP_REQUEST, SIGN_UP_SUCCESS, SIGN_UP_FAILURE, 
+    CHANGE_NICKNAME_REQUEST, CHANGE_NICKNAME_SUCCESS, CHANGE_NICKNAME_FAILURE,
 } from '../reducers/user';
 
 function loginAPI(data){
@@ -59,8 +60,7 @@ function signUpAPI(data){
 function* signUp(action){
     try{
         // action.data를 인자로 전달
-        const result = yield call(signUpAPI, action.data);
-        console.log(result);
+        yield call(signUpAPI, action.data);
         
         yield put({
             type: SIGN_UP_SUCCESS,
@@ -101,8 +101,8 @@ function unFollowAPI(){
 
 function* unFollow(action){
     try{
-        // const result = yield call(unFollowAPI);
-        yield delay(1000);
+        const result = yield call(unFollowAPI);
+
         yield put({
             type: UNFOLLOW_SUCCESS,
             data: action.data,
@@ -138,6 +138,26 @@ function* loadMyInfo(action){
     }
 }
 
+function changeNicknameAPI(data){
+    return axios.patch('/user/nickname', { nickname: data });
+}
+
+function* changeNickname(action){
+    try{
+        const result = yield call(changeNicknameAPI, action.data);
+        yield put({
+            type: CHANGE_NICKNAME_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: CHANGE_NICKNAME_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
 function* watchFollow(){
     yield takeLatest(FOLLOW_REQUEST, follow);
 }
@@ -162,8 +182,13 @@ function* watchLoadMyInfo(){
     yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
 }
 
+function* watchChangeNickname(){
+    yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
+}
+
 export default function* userSaga(){
     yield all([
+        fork(watchChangeNickname),
         fork(watchLoadMyInfo),
         fork(watchFollow),
         fork(watchUnFollow),

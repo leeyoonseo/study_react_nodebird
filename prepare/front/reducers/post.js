@@ -34,30 +34,6 @@ export const initialState = {
     addCommentError: null,
 };
 
-// faker를 이용한 dummydata
-// 성능최적화 테스트할때 몇 천개 작업해볼 것
-export const generateDummyPost = (number) => Array(20).fill().map(() => ({
-    id: shortId.generate(),
-    User: {
-        id: shortId.generate(),
-        nickname: faker.name.findName(),
-    },
-    content: faker.lorem.paragraph(),
-    // dummy 이미지 같이 크기만큼 공간을 차지하고 싶으면
-    // placeholder.com을 사용하면 좋다.
-    // lorempixel.com도 있다.
-    Images: [{
-        src: faker.image.image(),
-    }],
-    Comments: [{
-        User: {
-            id: shortId.generate(),
-            nickname: faker.name.findName(),
-        },
-        content: faker.lorem.sentence(),
-    }],
-}));
-
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
 export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
@@ -177,7 +153,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;
             
         case REMOVE_POST_SUCCESS:
-            draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data);
+            draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data.PostId);
             draft.removePostLoading = false;
             draft.removePostDone = true;
             break;

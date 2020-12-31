@@ -58,7 +58,8 @@ function* addPost(action){
 }
 
 function removePostAPI(data){
-    return axios.delete('/post', data);
+    // delete는 데이터 못 넣음
+    return axios.delete(`/post/${data}`);
 }
 
 function* removePost(action){
@@ -70,7 +71,6 @@ function* removePost(action){
             data: result.data,
         });
 
-        // user reducer 상태
         yield put({
             type: REMOVE_POST_OF_ME,
             data: action.data,

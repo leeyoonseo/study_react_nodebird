@@ -28,7 +28,6 @@ const PostCard = ({ post }) => {
     }, []);
 
     const onUnlike = useCallback(() => {
-        console.log('onUnlike');
         dispatch({
             type: UNLIKE_POST_REQUEST,
             data: post.id,

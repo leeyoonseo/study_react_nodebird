@@ -7,7 +7,8 @@ import {
     LOAD_POSTS_REQUEST, LOAD_POSTS_SUCCESS, LOAD_POSTS_FAILURE,
     ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_POST_FAILURE,
     REMOVE_POST_REQUEST, REMOVE_POST_SUCCESS, REMOVE_POST_FAILURE,
-    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE,
+    ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, 
+    UPLOAD_IMAGES_REQUEST, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_FAILURE,
 
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
@@ -154,6 +155,29 @@ function* likePost(action){
     }
 }
 
+function uploadImagesAPI(data){
+    // formData는 감싸서 { name: data } json 형식으로 보내면 안됨`
+    return axios.post('/post/images', data);
+}
+
+function* uploadImages(action){
+    try{
+        const result = yield call(uploadImagesAPI, action.data);
+        
+        yield put({
+            type: UPLOAD_IMAGES_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: UPLOAD_IMAGES_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
+
 function* watchLoadPosts(){
     // throttle로 scroll 이벤트 여러번 방지
     // throttle이 5초를 지켜주지만, 기존 요청을 취소하지않음
@@ -182,8 +206,13 @@ function* watchLikePost(){
     yield takeLatest(LIKE_POST_REQUEST, likePost);
 }
 
+function* watchUploadImages(){
+    yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
+}
+
 export default function* postSaga(){
     yield all([
+        fork(watchUploadImages),
         fork(watchUnlikePost),
         fork(watchLikePost),
         fork(watchAddPost),

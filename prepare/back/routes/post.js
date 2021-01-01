@@ -1,8 +1,26 @@
 const express = require('express');
-const router = express.Router();
+
+// multer는 app.js에 장착할 수 있으나 보통 라우터에서 장착함
+// 어떤 폼은 하나, 여러개 등등 전송 형식, 타입이 다르기때문에 공통적으로 사용안하는것을 추천
+const multer = require('multer');
+const path = require('path');
+
+// 파일 시스템을 조작할 수 있는 모듈
+const fs = require('fs');
 
 const { Post, Image, Comment, User } = require('../models');
 const { isLoggedIn } = require('./middlewares');
+
+const router = express.Router();
+
+try{
+    // uploads 폴더가 있는지 검사
+    fs.accessSync('uploads');
+}catch(error){
+    // 폴더가 없으면 생성
+    console.log('uploads 폴더가 없으므로 생성합니다.');
+    fs.mkdirSync('uploads');
+}
 
 router.post('/', isLoggedIn, async (req, res, next) => {
     try{
@@ -73,6 +91,61 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
 
         res.status(201).json(fullComment);
 
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+// 폼마다 형식이 달라서 multer 미들웨어를 사용해서 라우터마다 별도로...
+// 여기서 이미지를 업로드함
+const upload = multer({
+    // 어디에 저장? : 컴퓨터의 하드
+    storage: multer.diskStorage({
+        
+        // 지금은 하드에 저장할건데 나중에는 클라우드에 저장할 것임..
+        // 하드웨어에 저장하면 백엔드 요청이 많을 경우 서버 스케일링 시(복사?) 서버를 복사시마다 이미지가 같이 복사되서 넘어감
+        // 즉 쓸데없는 용량이 문제가 될 수 있다.
+        // 배포 시 s3 대체할 예정
+        destination(req, file, done){
+            // uploads 파일에 저장할거야
+            //
+            done(null, 'uploads');
+        },
+
+        // 파일명을 저장
+        filename(req, file, done){ // 제로초.png
+
+            // 중복되는 파일네임을 체크안해주면 노드는 기본적으로 덮어씌운다고함
+            // 따라서 업로드 시에 파일명 뒤에 언제 업로드했는지 날짜, 시, 초를 넣어준다고함.
+            // file.originalname는 파일명
+            const ext = path.extname(file.originalname); // 확장자 추출(.png)
+
+            // path는 노드에서 제공
+            const basename = path.basename(file.originalname, ext); // 제로초
+
+            done(null, basename + new Date().getTime() + ext); // 제로초12315.png로 저장됨
+        },
+    }),
+
+    // 파일 사이즈 제한.. 서버 공격이 될 수도 있기때문에 용량제한도 필요함
+    // 이미지, 동영상은 우리 서버에 안거치는게 좋음.. 
+    // 서버비용 비쌈. 웬만하면 프론트-클라우드로 바로 올리는게 베스트임
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+});
+
+// 이미지 업로드 용 라우터 
+// array가 아닌 하나의 이미지일 경우에는 upload.single('image')를 쓰면된다.
+// json, text일 경우에는 upload.none이면된다.
+// file input이 두개이상일 경우에는 upload.fields
+// 참고: https://www.zerocho.com/category/NodeJS/post/5950a6c4f7934c001894ea83
+router.post('/images', isLoggedIn, upload.array('image'), async (req, res, next) => {
+    // console.log(req.files);
+
+    try{
+
+        // 어디에 업로드가 되었는지 파일명 전달
+        res.json(req.files.map((v) => v.filename));
     }catch(error){
         console.error(error);
         next(error);

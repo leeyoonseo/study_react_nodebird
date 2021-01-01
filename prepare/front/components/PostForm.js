@@ -4,7 +4,7 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { Form, Input, Button } from 'antd';
 import { useSelector, useDispatch } from 'react-redux';
 import useInput from '../hooks/useInput';
-import { addPost } from '../reducers/post';
+import { addPost, UPLOAD_IMAGES_REQUEST } from '../reducers/post';
 
 
 const PostForm = () => {
@@ -28,7 +28,32 @@ const PostForm = () => {
         imageInput.current.click();
     }, [ imageInput.current ]);
 
+    const onChangeImages = useCallback((e) => {
+        console.log(e.target.files); // 이 안에 이미지 정보가 있다. 유사배열임..
+        
+        // form데이터로 보내야 멀티파트형식으로 보낼수있고 이 형식으로 보내야 multer가 처리할 수 있다.
+        const imageFormData = new FormData();
+        
+        // 배열에 forEach 메서드를 빌려서 사용
+        // e.target.files는 유사배열이기 때문에 forEach메서드 제공이 안됨
+        [].forEach.call(e.target.files, (f) => {
+
+            // 키 값이랑 input, router의 키 값이 다 동일해야함....
+            imageFormData.append('image', f);
+        });
+
+        dispatch({
+            type: UPLOAD_IMAGES_REQUEST,
+            data: imageFormData,
+        });
+
+    }, []);
+
     return(
+        // 이미지 업로드할때 폼에서 encType지정되어있기 때문에 저 형식으로 이미지가 올라감
+        // 하지만 프론트-백에서 express에서 인코디드형식을 지정해줬는데 (urlencoded..)
+        // 멀티 파트 처리하는 것을 아직안해서(백엔드에) 설정을 해줘야 받을 수 있다.(보통 비디오, 이미지등)
+        // multer install 해주자
         <Form 
             encType="multipart/form-data" 
             onFinish={onSubmit}
@@ -43,9 +68,12 @@ const PostForm = () => {
             <div>
                 <input 
                     type="file" 
+                    // 이미지 input에서 올린게 서버 router에서 upload의 array로 전달된다.
+                    name="image"
                     multiple 
                     hidden
                     ref={imageInput}
+                    onChange={onChangeImages}
                 />
                 <Button onClick={onClickImageUpload}>이미지 업로드</Button>
                 <Button 

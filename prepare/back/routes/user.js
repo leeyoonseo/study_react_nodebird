@@ -92,7 +92,6 @@ router.post('/', isNotLoggedIn, async (req, res, next) => { // POST /user/
         // res.json(); // res.send('OK'); 로 작업해도됨.
         // 200으로해도되나 201은 잘 생성되었다는 좀 더 디테일한 값
         res.status(201).send('OK'); // status 생략가능하나 적는것을 추천 
-     
     }catch(error){
         console.error(error);
         // next를 통해 에러를 보낼수있다.
@@ -176,6 +175,92 @@ router.patch('/nickname', isLoggedIn, async(req, res, next) => {
         });
 
         res.status(200).json({ nickname: req.body.nickname });
+
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try{
+
+        const user = await User.findOne({ where: { id: req.params.userId }});
+
+        if(!user){
+            res.status(403).send('없는 사람은 팔로우할 수 없습니다.');
+        }
+
+        await user.addFollowers(req.user.id);
+        
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+
+router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try{
+        const user = await User.findOne({ where: { id: req.params.userId }});
+
+        if(!user){
+            res.status(403).send('없는 사람은 언팔로우할 수 없습니다.');
+        }
+
+        await user.removeFollowers(req.user.id);
+        
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
+    try{
+        const user = await User.findOne({ where: { id: req.params.userId }});
+
+        if(!user){
+            res.status(403).send('없는 사람은 차단할 수 없습니다.');
+        }
+
+        await user.removeFollowings(req.user.id);
+        
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+
+router.get('/followers', isLoggedIn, async (req, res, next) => {
+    try{
+        const user = await User.findOne({ where: { id: req.user.id }});
+        if(!user){
+            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
+        }
+
+        const followers = await user.getFollowers();
+        res.status(200).json(followers);
+
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+router.get('/followings', isLoggedIn, async (req, res, next) => {
+    try{
+        const user = await User.findOne({ where: { id: req.user.id }});
+        if(!user){
+            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
+        }
+
+        const followings = await user.getFollowings();
+        res.status(200).json(followings);
 
     }catch(error){
         console.error(error);

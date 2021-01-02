@@ -8,7 +8,7 @@ const path = require('path');
 // 파일 시스템을 조작할 수 있는 모듈
 const fs = require('fs');
 
-const { Post, Image, Comment, User } = require('../models');
+const { Post, Image, Comment, User, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
@@ -61,10 +61,24 @@ const upload = multer({
 
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     try{
+        const hashtags = req.body.content.match(/#[^\s#]+/g);
+
         const post = await Post.create({
             content: req.body.content,
             UserId: req.user.id,
         });
+
+        // [TODO 수정할것] 한번에 중복되는 새로운 해시태그로 등록하는 경우, 중복 갯수만큼 db에 등록됨.
+        if(hashtags){
+            // Hashtag.create만 할 경우 문제가 되는게, 중복되는 Hashtag에 대해서도 db에 계속 생성하게 된다.
+            // 따라서 findOrCreate를 사용한다.
+            const result = await Promise.all(hashtags.map((tag) => Hashtag.findOrCreate({ 
+                // create와는 다르게 where이 추가됨
+                where: { name: tag.slice(1).toLowerCase() },
+            }))); // findOrCreate 사용시 [노드, true], [리액트, true] 형식으로 반환됨
+            
+            await post.addHashtags(result.map((v) => v[0]));
+        }
 
         if(req.body.image){
             if(Array.isArray(req.body.image)){ // 이미지 여러개 올리면 배열로 올라감 image: ['어쩌고.png', '저쩌고.png']

@@ -34,7 +34,8 @@ function* loadPosts(action){
 }
 
 function addPostAPI(data){
-    return axios.post('/post', { content: data });
+    // formData는 data로 전달(json 형식X)
+    return axios.post('/post', data);
 }
 
 function* addPost(action){

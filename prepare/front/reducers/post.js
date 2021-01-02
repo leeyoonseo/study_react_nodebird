@@ -66,6 +66,9 @@ export const UPLOAD_IMAGES_REQUEST = 'UPLOAD_IMAGES_REQUEST';
 export const UPLOAD_IMAGES_SUCCESS = 'UPLOAD_IMAGES_SUCCESS';
 export const UPLOAD_IMAGES_FAILURE = 'UPLOAD_IMAGES_FAILURE';
 
+// 동기 액션은 하나만 만들어도됨
+export const REMOVE_IMAGE = 'REMOVE_IMAGE';
+
 export const addPost = (data) => ({
     type : ADD_POST_REQUEST,
     data,
@@ -80,6 +83,11 @@ export const addComment = (data) => ({
 // request -> saga -> reducer -> success -> view -> useEffect...
 const reducer = (state = initialState, action) => produce(state, (draft) =>{
     switch(action.type){
+        // 만약에 서버에서 지울 경우에는 비동기로 만들어야함..
+        case REMOVE_IMAGE:
+            draft.imagePaths = draft.imagePaths.filter((v, i) => i !== action.data);
+            break;
+
         case UNLIKE_POST_REQUEST: 
             draft.unlikePostLoading = true;
             draft.unlikePostDone = false;
@@ -147,6 +155,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             draft.mainPosts.unshift(action.data);
             draft.addPostLoading = false;
             draft.addPostDone = true;
+            draft.imagePaths = [];
             break;
 
         case ADD_POST_FAILURE:

@@ -26,6 +26,8 @@ const dotenv = require('dotenv');
 
 const morgan = require('morgan');
 
+const path = require('path');
+
 dotenv.config();
 
 const app = express();
@@ -44,6 +46,13 @@ passportConfig();
 // 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
 // 디버깅 용이
 app.use(morgan('dev'));
+
+// images업로드를 위한.. uploads 폴더 접근...
+// 맨 앞 인자 '/'는 localhost:3065의 /가됨  
+// __dirname -> 현재폴더(back) 안에 uploads를 합쳐줌..
+// __dirname + '/uploads' 와 같다고 볼 수 있으나 join을 쓰는건
+// 운영체제마다 경로 구분 기호가 다름 (/ or \.. 등..) 그래서 path.join을 보통씀 
+app.use('/', express.static(path.join(__dirname, 'uploads')));
 
 // 다른 라우터보다 위에 있어야함 (미들웨어는 순서대로 실행되기 때문에 라우터 실행전에 선언되어야함)
 // json, urlencoded는 프론트에서 데이터 넘기면 해석해서 req.body안에 넣어주는 역할

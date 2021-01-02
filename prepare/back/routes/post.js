@@ -22,12 +22,64 @@ try{
     fs.mkdirSync('uploads');
 }
 
-router.post('/', isLoggedIn, async (req, res, next) => {
+// 폼마다 형식이 달라서 multer 미들웨어를 사용해서 라우터마다 별도로...
+// 여기서 이미지를 업로드함
+const upload = multer({
+    // 어디에 저장? : 컴퓨터의 하드
+    storage: multer.diskStorage({
+        
+        // 지금은 하드에 저장할건데 나중에는 클라우드에 저장할 것임..
+        // 하드웨어에 저장하면 백엔드 요청이 많을 경우 서버 스케일링 시(복사?) 서버를 복사시마다 이미지가 같이 복사되서 넘어감
+        // 즉 쓸데없는 용량이 문제가 될 수 있다.
+        // 배포 시 s3 대체할 예정
+        destination(req, file, done){
+            // uploads 파일에 저장할거야
+            //
+            done(null, 'uploads');
+        },
+
+        // 파일명을 저장
+        filename(req, file, done){ // 제로초.png
+
+            // 중복되는 파일네임을 체크안해주면 노드는 기본적으로 덮어씌운다고함
+            // 따라서 업로드 시에 파일명 뒤에 언제 업로드했는지 날짜, 시, 초를 넣어준다고함.
+            // file.originalname는 파일명
+            const ext = path.extname(file.originalname); // 확장자 추출(.png)
+
+            // path는 노드에서 제공
+            const basename = path.basename(file.originalname, ext); // 제로초
+
+            done(null, basename + '_' + new Date().getTime() + ext); // 제로초12315.png로 저장됨
+        },
+    }),
+
+    // 파일 사이즈 제한.. 서버 공격이 될 수도 있기때문에 용량제한도 필요함
+    // 이미지, 동영상은 우리 서버에 안거치는게 좋음.. 
+    // 서버비용 비쌈. 웬만하면 프론트-클라우드로 바로 올리는게 베스트임
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+});
+
+router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     try{
         const post = await Post.create({
             content: req.body.content,
             UserId: req.user.id,
         });
+
+        if(req.body.image){
+            if(Array.isArray(req.body.image)){ // 이미지 여러개 올리면 배열로 올라감 image: ['어쩌고.png', '저쩌고.png']
+                
+                // 둘다 promise이기에 아래처럼 처리
+                // db에는 파일 주소만 저장함 (무거워지니..)
+                // 또한 db에 넣으면 캐싱을 못하기에 클라우드에 넣고 cdn 캐싱 적용하고 db에는 파일 접근 주소만 가지고 있다.
+                const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image }))); // sequelize에 create하는    
+                await post.addImages(images);
+                
+            }else{ // 이미지 하나만 올리면 image: 어쩌고.png
+                const image = await Image.create({ src: req.body.image });
+                await post.addImages(image);
+            }
+        }
 
         const fullPost = await Post.findOne({
             where: { id: post.id },
@@ -95,43 +147,6 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
         console.error(error);
         next(error);
     }
-});
-
-// 폼마다 형식이 달라서 multer 미들웨어를 사용해서 라우터마다 별도로...
-// 여기서 이미지를 업로드함
-const upload = multer({
-    // 어디에 저장? : 컴퓨터의 하드
-    storage: multer.diskStorage({
-        
-        // 지금은 하드에 저장할건데 나중에는 클라우드에 저장할 것임..
-        // 하드웨어에 저장하면 백엔드 요청이 많을 경우 서버 스케일링 시(복사?) 서버를 복사시마다 이미지가 같이 복사되서 넘어감
-        // 즉 쓸데없는 용량이 문제가 될 수 있다.
-        // 배포 시 s3 대체할 예정
-        destination(req, file, done){
-            // uploads 파일에 저장할거야
-            //
-            done(null, 'uploads');
-        },
-
-        // 파일명을 저장
-        filename(req, file, done){ // 제로초.png
-
-            // 중복되는 파일네임을 체크안해주면 노드는 기본적으로 덮어씌운다고함
-            // 따라서 업로드 시에 파일명 뒤에 언제 업로드했는지 날짜, 시, 초를 넣어준다고함.
-            // file.originalname는 파일명
-            const ext = path.extname(file.originalname); // 확장자 추출(.png)
-
-            // path는 노드에서 제공
-            const basename = path.basename(file.originalname, ext); // 제로초
-
-            done(null, basename + new Date().getTime() + ext); // 제로초12315.png로 저장됨
-        },
-    }),
-
-    // 파일 사이즈 제한.. 서버 공격이 될 수도 있기때문에 용량제한도 필요함
-    // 이미지, 동영상은 우리 서버에 안거치는게 좋음.. 
-    // 서버비용 비쌈. 웬만하면 프론트-클라우드로 바로 올리는게 베스트임
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
 });
 
 // 이미지 업로드 용 라우터 

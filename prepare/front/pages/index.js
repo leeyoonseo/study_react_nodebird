@@ -14,6 +14,12 @@ const Home = () => {
     const { mainPosts, hasMorePosts, loadPostsLoading, retweetError } = useSelector(state => state.post);
 
     useEffect(() => {
+        if(retweetError){
+            alert(retweetError);
+        }
+    }, [ retweetError ]);
+
+    useEffect(() => {
         dispatch({
             type: LOAD_MY_INFO_REQUEST,
         });
@@ -24,35 +30,17 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        if(retweetError){
-            alert(retweetError);
-        }
-    }, [ retweetError ]);
-
-    useEffect(() => {
         function onScroll(){
-            // 스크롤 높이 구할때, 아래 세개를 가장 많이 씀
-            console.log(
-                
-                // document 총 길이에서 얼마나 내렸는지
-                // window.scrollY,
-
-                // 브라우저 화면 보이는 길이
-                // document.documentElement.clientHeight, 
-
-                // document 총 길이
-                // document.documentElement.scrollHeight
-            );
-            
-            // scrollY + clientHeight = scrollHeight
-            // 2개를 더해서 끝까지 내린것을 판단할 수 있음
             if(window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300){
-                // loadPostsLoading로 여러번 호출되는 것 방지
+                
                 if(hasMorePosts && !loadPostsLoading){
+                    const lastId = mainPosts[mainPosts.length - 1]?.id;
                     dispatch({
                         type: LOAD_POSTS_REQUEST,
+                        lastId,
                     });
                 }
+
             }
         }
 
@@ -63,12 +51,12 @@ const Home = () => {
         return() => {
             window.removeEventListener('scrol', onScroll);
         }
-    }, [ hasMorePosts, loadPostsLoading ]);
+    }, [hasMorePosts, loadPostsLoading, mainPosts]);
 
     return(
         <AppLatout>
             { me && <PostForm /> }
-            { mainPosts.map((post) => <PostCard key={post.id} post={post} />)}
+            { mainPosts.map((post, i) => <PostCard key={`${post.id}_${i}`} post={post} />)}
         </AppLatout>
     );
 }

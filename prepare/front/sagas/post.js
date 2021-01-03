@@ -14,13 +14,16 @@ import {
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
 
-function loadPostsAPI(data){
-    return axios.get('/posts', data);
+function loadPostsAPI(lastId){
+    // get은 데이터 못넣고 2번째 인자는 withCredentials자리임..
+    // get에서는 쿼리스트링으로 데이터 전달
+    // 예시: /posts?lastId=${lastId}&limit=10&offset=10
+    return axios.get(`/posts?lastId=${lastId || 0}`);
 }
 
 function* loadPosts(action){
     try{
-        const result = yield call(loadPostsAPI, action.data);
+        const result = yield call(loadPostsAPI, action.lastId);
         
         yield put({
             type: LOAD_POSTS_SUCCESS,

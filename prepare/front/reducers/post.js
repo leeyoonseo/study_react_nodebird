@@ -155,10 +155,13 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;        
 
         case LOAD_POSTS_SUCCESS: {
-            draft.mainPosts = action.data.concat(draft.mainPosts);
             draft.loadPostsLoading = false;
             draft.loadPostsDone = true;
-            draft.hasMorePosts = draft.mainPosts.length < 50;
+            draft.mainPosts = draft.mainPosts.concat(action.data);
+
+            // 1번의 요청낭비는 발생할 수 있다.
+            // 10개가 안된다면 요청이 멈추는데, 10의 배수일 경우 요청 1번이 될 수있다.
+            draft.hasMorePosts = action.data.length === 10;
             break;
         }
             
@@ -166,6 +169,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             draft.loadPostsLoading = false;
             draft.loadPostsError = action.error;
             break;
+
 
         case ADD_POST_REQUEST:
             draft.addPostLoading = true;

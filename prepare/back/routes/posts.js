@@ -1,12 +1,27 @@
 const express = require('express');
+const { Op } = require('sequelize');
 
 const router = express.Router();
 const { Post, User, Image, Comment } = require('../models');
 
 router.get('/', async (req, res, next) => {
     try{
+        const where = {};
+
+        // 마지막 포스트 가져오기는 쿼리스트링..
+        // 쿼리스트링이어서 req.query.lastId처럼 사ㅛㅇ가능
+        if(parseInt(req.query.lastId, 10)){ // 초기 로딩이 아닐 때
+            // 과거에는 { $lt: parseInt(req.query.lastId, 10) } 사용했었는데, 사라짐.
+            // sql injection 공격 가능성이 있어서 사라짐
+            // 따라서 sequelize op사용(op는 operator임)
+            // 이렇게 하면 조건이.... id가 lastId보다 작은 으로 변경됨
+            where.id = { [Op.lt]: parseInt(req.query.lastId, 10) }
+        }
+
         // 이렇게 하면 모든 게시글을 가져옴
         const posts = await Post.findAll({
+            where,
+
             // 몇개만 가져와라
             limit: 10,
 
@@ -28,8 +43,6 @@ router.get('/', async (req, res, next) => {
             // 정렬하는것, 기본값음 ASC이나 최신것부터는 DESC로 넣어줌
             order: [
                 [ 'createdAt', 'DESC' ],
-
-                // 아래 include에서 정렬이 필요한경우
                 [Comment, 'createdAt', 'DESC' ],
             ],
 
@@ -45,8 +58,7 @@ router.get('/', async (req, res, next) => {
                     attributes: [ 'id', 'nickname' ],
                 }],
             },{
-                model: User, // 좋아요 누른사람
-                // 이것을 넣어야 post.Likers가 생성됨
+                model: User,
                 as: 'Likers',
                 attributes: [ 'id' ],
             },{
@@ -59,9 +71,6 @@ router.get('/', async (req, res, next) => {
                     model: Image,
                 }]
             },],
-
-            // 특성 작성자 예시
-            // where: { UserId: 1 }
         });
 
         // 요청, 응답 기록하기

@@ -8,7 +8,8 @@ import {
     ADD_POST_REQUEST, ADD_POST_SUCCESS, ADD_POST_FAILURE,
     REMOVE_POST_REQUEST, REMOVE_POST_SUCCESS, REMOVE_POST_FAILURE,
     ADD_COMMENT_REQUEST, ADD_COMMENT_SUCCESS, ADD_COMMENT_FAILURE, 
-    UPLOAD_IMAGES_REQUEST, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_FAILURE,
+    UPLOAD_IMAGES_REQUEST, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_FAILURE, 
+    RETWEET_REQUEST, RETWEET_SUCCESS, RETWEET_FAILURE, 
 
 } from '../reducers/post';
 import { ADD_POST_TO_ME, REMOVE_POST_OF_ME } from '../reducers/user';
@@ -178,6 +179,26 @@ function* uploadImages(action){
     }
 }
 
+function retweetAPI(data){
+    return axios.post(`/post/${data}/retweet`); // 77 
+}
+
+function* retweet(action){
+    try{
+        const result = yield call(retweetAPI, action.data);
+        
+        yield put({
+            type: RETWEET_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: RETWEET_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
 
 function* watchLoadPosts(){
     // throttle로 scroll 이벤트 여러번 방지
@@ -211,8 +232,13 @@ function* watchUploadImages(){
     yield takeLatest(UPLOAD_IMAGES_REQUEST, uploadImages);
 }
 
+function* watchRetweet(){
+    yield takeLatest(RETWEET_REQUEST, retweet);
+}
+
 export default function* postSaga(){
     yield all([
+        fork(watchRetweet),
         fork(watchUploadImages),
         fork(watchUnlikePost),
         fork(watchLikePost),

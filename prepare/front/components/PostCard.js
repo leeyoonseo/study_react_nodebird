@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
@@ -12,23 +12,44 @@ import {
     LIKE_POST_REQUEST,
     UNLIKE_POST_REQUEST,
     REMOVE_POST_REQUEST,
+    RETWEET_REQUEST,
 } from '../reducers/post';
 
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
-    const { removePostLoading } = useSelector((state) => state.post);
+    const { removePostLoading, retweetError } = useSelector((state) => state.post);
     const [commentFormOpend, setCommentFormOpend] = useState(false);
-    
+    // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
+    // const { me } = useSelector((state) => state.user);
+    // const id = me?.id;
+    // 아니면 이렇게 한번에 해결
+    const id = useSelector((state) => state.user.me?.id);
+
+    // 무한루프.. 리렌더링 문제 해결 전까진...
+    // useEffect(() => {
+    //     if(retweetError){
+    //         alert(retweetError);
+    //     }
+    // }, [ retweetError ]);
+
     const onLike = useCallback(() => {
-        dispatch({
+        if(!id){
+            return alert('로그인이 필요합니다.');
+        }
+
+        return dispatch({
             type: LIKE_POST_REQUEST,
             data: post.id,
         });
     }, []);
 
     const onUnlike = useCallback(() => {
-        dispatch({
+        if(!id){
+            return alert('로그인이 필요합니다.');
+        }
+
+        return dispatch({
             type: UNLIKE_POST_REQUEST,
             data: post.id,
         });
@@ -39,17 +60,29 @@ const PostCard = ({ post }) => {
     }, []);
 
     const onRemovePost = useCallback(() => {
-        dispatch({
+        if(!id){
+            return alert('로그인이 필요합니다.');
+        }
+
+        return dispatch({
             type: REMOVE_POST_REQUEST,
             data: post.id,
         })    
     }, []);
 
-    // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
-    // const { me } = useSelector((state) => state.user);
-    // const id = me?.id;
-    // 아니면 이렇게 한번에 해결
-    const id = useSelector((state) => state.user.me?.id);
+    const onRetweet = useCallback(() => {
+        // 프론트, 서버 둘다 모두 처리
+        if(!id){
+            return alert('로그인이 필요합니다.');
+        }
+
+        return dispatch({
+            type: RETWEET_REQUEST,
+            data: post.id,
+        });
+
+    }, [ id ]);
+
     const liked = post.Likers.find((v) => v.id === id);
 
     return(
@@ -58,7 +91,7 @@ const PostCard = ({ post }) => {
                 cover={post.Images[0] && <PostImages images={post.Images} />}
                 // 배열안에 jsx를 넣을때 필수 key넣기
                 actions={[
-                    <RetweetOutlined key="retweet" />,
+                    <RetweetOutlined key="retweet" onClick={onRetweet}/>,
                     liked 
                         ? <HeartTwoTone 
                                 twoToneColor="#eb2f96" 

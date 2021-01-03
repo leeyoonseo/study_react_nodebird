@@ -7,9 +7,6 @@ import shortId from 'shortid';
 // 다른 스타일로 코딩해보기 https://immerjs.github.io/immer/docs/curried-produce
 import produce from 'immer';
 
-// faker : 가짜 더미 데이터
-import faker from 'faker';
-
 export const initialState = {
     mainPosts: [],
     imagePaths: [],
@@ -32,10 +29,12 @@ export const initialState = {
     addCommentLoading: false,
     addCommentDone: false,
     addCommentError: null,
-
     uploadImagesLoading: false,
     uploadImagesDone: false,
     uploadImagesError: null,
+    retweetLoading: false,
+    retweetDone: false,
+    retweetError: null,
 };
 
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
@@ -66,6 +65,10 @@ export const UPLOAD_IMAGES_REQUEST = 'UPLOAD_IMAGES_REQUEST';
 export const UPLOAD_IMAGES_SUCCESS = 'UPLOAD_IMAGES_SUCCESS';
 export const UPLOAD_IMAGES_FAILURE = 'UPLOAD_IMAGES_FAILURE';
 
+export const RETWEET_REQUEST = 'RETWEET_REQUEST';
+export const RETWEET_SUCCESS = 'RETWEET_SUCCESS';
+export const RETWEET_FAILURE = 'RETWEET_FAILURE';
+
 // 동기 액션은 하나만 만들어도됨
 export const REMOVE_IMAGE = 'REMOVE_IMAGE';
 
@@ -83,6 +86,26 @@ export const addComment = (data) => ({
 // request -> saga -> reducer -> success -> view -> useEffect...
 const reducer = (state = initialState, action) => produce(state, (draft) =>{
     switch(action.type){
+        case RETWEET_REQUEST: 
+            draft.retweetLoading = true;
+            draft.retweetDone = false;
+            draft.retweetError = null;   
+            break;            
+            
+        case RETWEET_SUCCESS: {
+            const post = draft.mainPosts.find((v) => v.id === action.data.PostId );
+            post.Likers = post.Likers.filter((v) => v.id !== action.data.UserId);
+            draft.retweetLoading = false;
+            draft.retweetDone = true;
+            break;
+        }
+
+        case RETWEET_FAILURE:
+            draft.retweetLoading = false;
+            draft.retweetError = action.error;
+            break;
+
+
         // 만약에 서버에서 지울 경우에는 비동기로 만들어야함..
         case REMOVE_IMAGE:
             draft.imagePaths = draft.imagePaths.filter((v, i) => i !== action.data);

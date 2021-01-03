@@ -249,4 +249,87 @@ router.delete('/:postId', isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
+    try{
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+            }],
+        });
+        console.log('post', post);
+
+        if(!post){
+            return res.status(403).send('존재하지 않는 게시글입니다.');
+        }
+
+        // 1) 게시자가 본인 글을 리트윗하는 것을 방지
+        // 2) 게시자 글을 남이 리트윗하고 그것을 게시자가 리트윗하는 것 방지
+        if(req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)){
+            return res.status(403).send('자신의 글은 리트윗할 수 없습니다.');
+        }
+
+        const retweetTargetId = post.RetweetId || post.id;
+        const exPost = await Post.findOne({
+            where: {
+                UserId: req.user.id,
+                RetweetId: retweetTargetId,
+            },
+        });
+
+        if(exPost){
+            return res.status(403).send('이미 리트윗했습니다.');
+        }
+
+        const retweet = await Post.create({
+            UserId: req.user.id,
+            RetweetId: retweetTargetId,
+            // model에서 allowNull:false로 작업했을 경우 content를 무조건 넣어야함
+            content: 'retweet',
+        });
+
+        // include가 복잡해지면 db에서 데이터 요청, 응답 속도가 너무 느려지므로
+        // 라우터를 분리하던가의 작업이 필요..
+        // 예를들어 댓글창을 열때... 코멘트를 가져오는 라우터를 만든다던가...
+        const retweetWithPrevPost = await Post.findOne({
+            where: { id: retweet.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                },{
+                    model: Image,
+                }]
+            },{
+                model: User,
+                attributes: [ 'id', 'nickname' ],
+            },{
+                model: Image,
+            },{
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                }]
+            }]
+        });
+
+        // 추가해야하나?
+        //{
+        //    model: User,
+        //    as: 'Likers',
+        //    attributes: [ 'id' ],
+        //},
+
+        res.status(201).json(retweetWithPrevPost);
+
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
 module.exports = router;

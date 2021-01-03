@@ -307,6 +307,10 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
                 model: User,
                 attributes: [ 'id', 'nickname' ],
             },{
+                model: User,
+                as: 'Likers',
+                attributes: [ 'id' ],
+            },{
                 model: Image,
             },{
                 model: Comment,
@@ -316,13 +320,6 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
                 }]
             }]
         });
-
-        // 추가해야하나?
-        //{
-        //    model: User,
-        //    as: 'Likers',
-        //    attributes: [ 'id' ],
-        //},
 
         res.status(201).json(retweetWithPrevPost);
 

@@ -49,7 +49,16 @@ router.get('/', async (req, res, next) => {
                 // 이것을 넣어야 post.Likers가 생성됨
                 as: 'Likers',
                 attributes: [ 'id' ],
-            }],
+            },{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                },{
+                    model: Image,
+                }]
+            },],
 
             // 특성 작성자 예시
             // where: { UserId: 1 }

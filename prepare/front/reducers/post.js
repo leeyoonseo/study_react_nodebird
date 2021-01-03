@@ -93,8 +93,7 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;            
             
         case RETWEET_SUCCESS: {
-            const post = draft.mainPosts.find((v) => v.id === action.data.PostId );
-            post.Likers = post.Likers.filter((v) => v.id !== action.data.UserId);
+            draft.mainPosts.unshift(action.data);
             draft.retweetLoading = false;
             draft.retweetDone = true;
             break;

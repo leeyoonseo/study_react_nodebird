@@ -18,20 +18,13 @@ import {
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
-    const { removePostLoading, retweetError } = useSelector((state) => state.post);
+    const { removePostLoading } = useSelector((state) => state.post);
     const [commentFormOpend, setCommentFormOpend] = useState(false);
     // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
     // const { me } = useSelector((state) => state.user);
     // const id = me?.id;
     // 아니면 이렇게 한번에 해결
     const id = useSelector((state) => state.user.me?.id);
-
-    // 무한루프.. 리렌더링 문제 해결 전까진...
-    // useEffect(() => {
-    //     if(retweetError){
-    //         alert(retweetError);
-    //     }
-    // }, [ retweetError ]);
 
     const onLike = useCallback(() => {
         if(!id){
@@ -127,13 +120,27 @@ const PostCard = ({ post }) => {
                         <EllipsisOutlined/>
                     </Popover>
                 ]}
+                title={post.RetweetId ? `${post.User.nickname}님이 리트윗하셨습니다.` : null}
                 extra={ id && <FollowButton post={post} />}
             >
-                <Card.Meta
-                    avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
-                    title={post.User.nickname}
-                    description={<PostCardContent postData={post.content} />}
-                />
+                {post.RetweetId && post.Retweet
+                    ? (
+                        <Card cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images} />}>
+                            <Card.Meta
+                                avatar={<Avatar>{post.Retweet.User.nickname[0]}</Avatar>}
+                                title={post.Retweet.User.nickname}
+                                description={<PostCardContent postData={post.Retweet.content} />}
+                            />
+                        </Card>   
+                    ) : (
+                        <Card.Meta
+                            avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+                            title={post.User.nickname}
+                            description={<PostCardContent postData={post.content} />}
+                        />
+                    )
+                }
+                
             </Card>
 
             {commentFormOpend && (
@@ -176,6 +183,8 @@ PostCard.propTypes = {
         Comments: PropTypes.arrayOf(PropTypes.object),
         Images: PropTypes.arrayOf(PropTypes.object),
         Likers: PropTypes.arrayOf(PropTypes.object),
+        RetweetId: PropTypes.number,
+        Retweet: PropTypes.objectOf(PropTypes.any),
     }).isRequired,
 };
 

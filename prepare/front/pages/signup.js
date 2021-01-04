@@ -1,8 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Router from 'next/router';
+import axios from 'axios';
+import { END } from 'redux-saga';
+
 import useInput from '../hooks/useInput';
 import Head from 'next/head';
+import wrapper from '../store/configureStore';
 import AppLayout from '../components/AppLayout';
 
 import styled from 'styled-components';
@@ -16,12 +20,6 @@ const ErrorMessage = styled.div`
 const Signup = () => {
     const dispatch = useDispatch();
     const { signUpLoading, signUpDone, signUpError, me } = useSelector((state) => state.user);
-
-    // useEffect(() => {
-    //     dispatch({
-    //         type: LOAD_MY_INFO_REQUEST,
-    //     });
-    // }, []);
 
     // 프로필에 있다가 로그인할때
     // 리다이렉트 처리
@@ -167,5 +165,20 @@ const Signup = () => {
         </AppLayout>
     );
 }
+
+export const getServerSideProps = wrapper.getServerSideProps(async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+    axios.defaults.headers.Cookie = '';
+
+    if(context.req && cookie){
+        axios.defaults.headers.Cookie = cookie;
+    }
+
+    context.store.dispatch({
+        type: LOAD_MY_INFO_REQUEST,
+    });
+    context.store.dispatch(END);
+    await context.store.sagaTask.toPromise();
+});
 
 export default Signup;

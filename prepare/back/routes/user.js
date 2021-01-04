@@ -54,6 +54,48 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// 특정 유저 정보 가져오기
+router.get('/:userId', async (req, res, next) => {
+    try{
+        const fullUserWithoutPassword = await User.findOne({
+            where: { id: req.params.userId },
+            attributes: {
+                exclude: [ 'password' ]
+            },
+            include: [{ 
+                model: Post ,
+                attributes: [ 'id' ],
+            },{ 
+                model: User,
+                as: 'Followings',
+                attributes: [ 'id' ],
+            },{ 
+                model: User,
+                as: 'Followers', 
+                attributes: [ 'id' ],
+            }]
+        });
+
+        if(fullUserWithoutPassword){
+            // squelize데이터 json으로 변환(가공하려면 해야함)
+            const data = fullUserWithoutPassword.toJSON();
+            
+            // 개인정보 침해 예방
+            data.Posts = data.Posts.length;
+            data.Followers = data.Posts.length;
+            data.Followings = data.Posts.length;
+
+            res.status(200).json(data);
+        }else{
+            res.status(404).send('존재하지않는 사용자입니다.');
+        }
+        
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,
 // req.body를 쓰기전에 app.js에서 선행작업을 해야함

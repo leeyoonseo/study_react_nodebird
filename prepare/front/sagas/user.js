@@ -163,10 +163,8 @@ function* loadMyInfo(action){
     }
 }
 
-function loadUserAPI(){
-    // 쿠키로만 작업
-    // get, delete는 데이터가 없으므로 2번째 인자가 옵션자리
-    return axios.get('/user');
+function loadUserAPI(data){
+    return axios.get(`/user/${data}`);
 }
 
 function* loadUser(action){

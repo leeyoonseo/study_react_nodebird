@@ -8,6 +8,7 @@ const postRouter = require('./routes/post');
 // 개발자마다 다름.. 걍 스타일임.. 단수 복수를 구분하려고...
 const postsRouter = require('./routes/posts');
 const userRouter = require('./routes/user');
+const hashtagRouter = require('./routes/hashtag');
 
 // db
 const db = require('./models');
@@ -92,6 +93,7 @@ app.use(cors({
 app.use('/post', postRouter);
 app.use('/posts', postsRouter);
 app.use('/user', userRouter);
+app.use('/hashtag', hashtagRouter);
 
 // 내부적으로 에러처리 미들웨어가 동작함
 // 이런식으로 직접 에러처리 미들웨어를 만들 수 있다.

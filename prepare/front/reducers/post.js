@@ -41,6 +41,15 @@ export const initialState = {
     retweetError: null,
 };
 
+// LOAD_USER_POSTS_REQUEST
+export const LOAD_USER_POSTS_REQUEST = 'LOAD_USER_POSTS_REQUEST';
+export const LOAD_USER_POSTS_SUCCESS = 'LOAD_USER_POSTS_SUCCESS';
+export const LOAD_USER_POSTS_FAILURE = 'LOAD_USER_POSTS_FAILURE';
+
+export const LOAD_HASHTAG_POSTS_REQUEST = 'LOAD_HASHTAG_POSTS_REQUEST';
+export const LOAD_HASHTAG_POSTS_SUCCESS = 'LOAD_HASHTAG_POSTS_SUCCESS';
+export const LOAD_HASHTAG_POSTS_FAILURE = 'LOAD_HASHTAG_POSTS_FAILURE';
+
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
 export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
@@ -157,13 +166,19 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             draft.likePostError = action.error;
             break;
 
+        // 재사용할 수 있다!
+        // 1) 한페이지에서 같이 사용하지 않을 경우 공유할 수 있다.
+        case LOAD_USER_POSTS_REQUEST:
+        case LOAD_HASHTAG_POSTS_REQUEST:
         case LOAD_POSTS_REQUEST:
             draft.loadPostsLoading = true;
             draft.loadPostsDone = false;
             draft.loadPostsError = null;   
             break;        
 
-        case LOAD_POSTS_SUCCESS: {
+        case LOAD_USER_POSTS_SUCCESS:
+        case LOAD_HASHTAG_POSTS_SUCCESS:
+        case LOAD_POSTS_SUCCESS:
             draft.loadPostsLoading = false;
             draft.loadPostsDone = true;
             draft.mainPosts = draft.mainPosts.concat(action.data);
@@ -172,8 +187,9 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             // 10개가 안된다면 요청이 멈추는데, 10의 배수일 경우 요청 1번이 될 수있다.
             draft.hasMorePosts = action.data.length === 10;
             break;
-        }
-            
+
+        case LOAD_USER_POSTS_FAILURE:
+        case LOAD_HASHTAG_POSTS_FAILURE:
         case LOAD_POST_FAILURE:
             draft.loadPostLoading = false;
             draft.loadPostError = action.error;

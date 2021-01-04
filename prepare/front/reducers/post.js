@@ -10,6 +10,7 @@ import produce from 'immer';
 export const initialState = {
     mainPosts: [],
     imagePaths: [],
+    singlePost: null,
     hasMorePosts: true,
     likePostLoading: false,
     likePostDone: false,
@@ -20,6 +21,9 @@ export const initialState = {
     loadPostsLoading: false,
     loadPostsDone: false,
     loadPostsError: null,
+    loadPostLoading: false,
+    loadPostDone: false,
+    loadPostError: null,
     addPostLoading: false,
     addPostDone: false,
     addPostError: null,
@@ -40,6 +44,11 @@ export const initialState = {
 export const LOAD_POSTS_REQUEST = 'LOAD_POSTS_REQUEST';
 export const LOAD_POSTS_SUCCESS = 'LOAD_POSTS_SUCCESS';
 export const LOAD_POSTS_FAILURE = 'LOAD_POSTS_FAILURE';
+
+export const LOAD_POST_REQUEST = 'LOAD_POST_REQUEST';
+export const LOAD_POST_SUCCESS = 'LOAD_POST_SUCCESS';
+export const LOAD_POST_FAILURE = 'LOAD_POST_FAILURE';
+
 
 export const ADD_POST_REQUEST = 'ADD_POST_REQUEST';
 export const ADD_POST_SUCCESS = 'ADD_POST_SUCCESS';
@@ -162,6 +171,24 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             // 1번의 요청낭비는 발생할 수 있다.
             // 10개가 안된다면 요청이 멈추는데, 10의 배수일 경우 요청 1번이 될 수있다.
             draft.hasMorePosts = action.data.length === 10;
+            break;
+        }
+            
+        case LOAD_POST_FAILURE:
+            draft.loadPostLoading = false;
+            draft.loadPostError = action.error;
+            break;
+
+        case LOAD_POST_REQUEST:
+            draft.loadPostLoading = true;
+            draft.loadPostDone = false;
+            draft.loadPostError = null;   
+            break;        
+
+        case LOAD_POST_SUCCESS: {
+            draft.loadPostLoading = false;
+            draft.loadPostDone = true;
+            draft.singlePost = action.data;
             break;
         }
             

@@ -58,6 +58,8 @@ router.get('/', async (req, res, next) => {
 // 안붙여도 데이터가 들어가기는 하는데,
 // req.body를 쓰기전에 app.js에서 선행작업을 해야함
 router.post('/', isNotLoggedIn, async (req, res, next) => { // POST /user/
+    // 여기에 cookie가 있음
+    console.log(req.headers);
     try{
         // 중복되는지 찾기
         // 비동기인지 아닌지모르겠으면 라이브러리 공식문서를 통해 확인할 것

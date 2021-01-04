@@ -3,6 +3,7 @@ import { all, fork, call, put, takeLatest } from 'redux-saga/effects';
 import axios from 'axios';
 
 import { 
+    LOAD_USER_REQUEST, LOAD_USER_SUCCESS, LOAD_USER_FAILURE, 
     LOAD_MY_INFO_REQUEST, LOAD_MY_INFO_SUCCESS, LOAD_MY_INFO_FAILURE, 
     FOLLOW_REQUEST, FOLLOW_SUCCESS, FOLLOW_FAILURE, 
     UNFOLLOW_REQUEST, UNFOLLOW_SUCCESS, UNFOLLOW_FAILURE, 
@@ -162,6 +163,28 @@ function* loadMyInfo(action){
     }
 }
 
+function loadUserAPI(){
+    // 쿠키로만 작업
+    // get, delete는 데이터가 없으므로 2번째 인자가 옵션자리
+    return axios.get('/user');
+}
+
+function* loadUser(action){
+    try{
+        const result = yield call(loadUserAPI, action.data);
+        yield put({
+            type: LOAD_USER_SUCCESS,
+            data: result.data,
+        });
+
+    } catch(err){
+        yield put({
+            type: LOAD_USER_FAILURE,
+            error: err.response.data,
+        });
+    }
+}
+
 function changeNicknameAPI(data){
     return axios.patch('/user/nickname', { nickname: data });
 }
@@ -246,6 +269,10 @@ function* watchLoadMyInfo(){
     yield takeLatest(LOAD_MY_INFO_REQUEST, loadMyInfo);
 }
 
+function* watchLoadUser(){
+    yield takeLatest(LOAD_USER_REQUEST, loadUser);
+}
+
 function* watchChangeNickname(){
     yield takeLatest(CHANGE_NICKNAME_REQUEST, changeNickname);
 }
@@ -269,6 +296,7 @@ export default function* userSaga(){
         fork(watchLoadFollowers),
         fork(watchChangeNickname),
         fork(watchLoadMyInfo),
+        fork(watchLoadUser),
         fork(watchRemoveFollower),
         fork(watchFollow),
         fork(watchUnFollow),

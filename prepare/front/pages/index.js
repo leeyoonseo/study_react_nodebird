@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { END } from 'redux-saga';
 import AppLatout from "../components/AppLayout";
@@ -58,6 +59,16 @@ const Home = () => {
 // 곧 없어질듯?
 // 이 부분이 홈보다 먼저 실행됨
 export const getServerSideProps = wrapper.getServerSideProps(async (context) => {
+    const cookie = context.req ? context.req.headers.cookie : '';
+
+   // 아래와같이 비워두는 코드가 없으면.. 로그인을 공유(쿠키공유)하는 경우가 생김...
+   // 서버는 1개밖에 없기때문에.. 지워주는 경우가 필요함
+    axios.defaults.headers.Cookie = ''; 
+
+    if(context.req && cookie){
+        axios.defaults.headers.Cookie = cookie; 
+    }
+
     // context안에 store가 들어있다고함
     context.store.dispatch({
         type: LOAD_MY_INFO_REQUEST,

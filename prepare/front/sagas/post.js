@@ -61,7 +61,9 @@ function* loadUserPosts(action){
 }
 
 function loadHashtagPostsAPI(data, lastId){
-    return axios.get(`/hashtag/${data}?lastId=${lastId || 0}`);
+    // 서버요청할때 한글 들어가면 에러남
+    // encodeURIComponent => 주소창에 넣어도되는 문자로 변경됨. 나중에 decodeURIComponent로 변환해서 쓰면됨
+    return axios.get(`/hashtag/${encodeURIComponent(data)}?lastId=${lastId || 0}`);
 }
 
 function* loadHashtagPosts(action){

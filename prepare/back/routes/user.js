@@ -56,7 +56,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // 특정 유저 정보 가져오기
-router.get('/:userId/posts', async (req, res, next) => {
+router.get('/:userId', async (req, res, next) => {
     try{
         const fullUserWithoutPassword = await User.findOne({
             where: { id: req.params.userId },

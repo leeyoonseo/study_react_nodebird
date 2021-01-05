@@ -1,7 +1,7 @@
 const express = require('express');
 const { Op } = require('sequelize');
-
 const { Post, Hashtag, Image, Comment, User } = require('../models');
+
 const router = express.Router();
 
 router.get('/:hashtag', async (req, res, next) => { 
@@ -15,15 +15,13 @@ router.get('/:hashtag', async (req, res, next) => {
         const posts = await Post.findAll({
             where,
             limit: 10,
-            order: [
-                [ 'createdAt', 'DESC' ],
-                [Comment, 'createdAt', 'DESC' ],
-            ],
+            order: [[ 'createdAt', 'DESC' ]],
             include: [{
                 // include한 곳에서 조건 추가 가능
                 // hashtag는 여기서 가져오기!
                 model: Hashtag,
-                where: { name: req.params.hashtag },
+                // decodeURIComponent=> 한글 에러 방지
+                where: { name: decodeURIComponent(req.params.hashtag) },
             },{
                 model: User,
                 attributes: [ 'id', 'nickname' ],

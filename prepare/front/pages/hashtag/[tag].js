@@ -6,19 +6,19 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import axios from 'axios';
-// LOAD_USER_POSTS_REQUEST는 특정 사용자의 글만 보여줌
-import { LOAD_USER_POSTS_REQUEST } from '../../reducers/post';
-import { LOAD_MY_INFO_REQUEST, LOAD_USER_REQUEST } from '../../reducers/user';
+import { LOAD_HASHTAG_POSTS_REQUEST } from '../../reducers/post';
+import { LOAD_MY_INFO_REQUEST } from '../../reducers/user';
 import PostCard from '../../components/PostCard';
 import wrapper from '../../store/configureStore';
 import AppLayout from '../../components/AppLayout';
 
 // 특정 사용자의 게시글만 가져오기
-const User = () => {
+const Hashtag = () => {
     const dispatch = useDispatch();
     const router = useRouter();
-    const { id } = router.query;
+    const { tag } = router.query;
     const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector((state) => state.post);
+
     const { userInfo } = useSelector((state) => state.user);
 
     useEffect(() => {
@@ -26,9 +26,9 @@ const User = () => {
             if(window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300){
                 if(hasMorePosts && !loadPostsLoading){
                     dispatch({
-                        type: LOAD_USER_POSTS_REQUEST,
+                        type: LOAD_HASHTAG_POSTS_REQUEST,
                         lastId: mainPosts[mainPosts.length - 1] && mainPosts[mainPosts.length - 1].id,
-                        data: id,
+                        data: tag,
                     });
                 }
             }
@@ -37,21 +37,18 @@ const User = () => {
         return () => {
             window.removeEventListener('scroll', onScroll);
         };
-    }, [mainPosts.length, hasMorePosts, id], loadPostsLoading); 
+    }, [mainPosts.length, hasMorePosts, tag, loadPostsLoading]); 
 
     return(
         <AppLayout>
             <Head>
-                <title>
-                    {userInfo.nickname}님의 글
-                </title>
-                <meta name="description" content={`${userInfo.nickname}님의 글`} />
-                <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
-                <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
+                <title>{`해시태그 '${tag}' 글`}</title>
+                <meta name="description" content={`해시태그 '${tag}' 글`} />
+                <meta property="og:title" content={`해시태그 '${tag}' 글`} />
+                <meta property="og:description" content={`해시태그 '${tag}' 글`} />
                 <meta property="og:image" content="http://nodebird.com/favicon.png" />
-                <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
+                <meta property="og:url" content={`https://nodebird.com/user/${tag}`} />
             </Head>
-
             {
                 userInfo ? (
                     <Card
@@ -97,21 +94,16 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
     }
 
     context.store.dispatch({
-        type: LOAD_USER_POSTS_REQUEST,
-        data: context.params.id,
+        type: LOAD_HASHTAG_POSTS_REQUEST,
+        data: context.params.tag,
     });
 
     context.store.dispatch({
         type: LOAD_MY_INFO_REQUEST,
     });
 
-    context.store.dispatch({
-        type: LOAD_USER_REQUEST,
-        data: context.params.id,
-    });
-
     context.store.dispatch(END);
     await context.store.sagaTask.toPromise();
 });
 
-export default User;
+export default Hashtag;

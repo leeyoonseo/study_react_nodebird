@@ -55,98 +55,6 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-// 특정 유저 정보 가져오기
-router.get('/:userId', async (req, res, next) => {
-    try{
-        const fullUserWithoutPassword = await User.findOne({
-            where: { id: req.params.userId },
-            attributes: {
-                exclude: [ 'password' ]
-            },
-            include: [{ 
-                model: Post ,
-                attributes: [ 'id' ],
-            },{ 
-                model: User,
-                as: 'Followings',
-                attributes: [ 'id' ],
-            },{ 
-                model: User,
-                as: 'Followers', 
-                attributes: [ 'id' ],
-            }]
-        });
-
-        if(fullUserWithoutPassword){
-            // squelize데이터 json으로 변환(가공하려면 해야함)
-            const data = fullUserWithoutPassword.toJSON();
-            
-            // 개인정보 침해 예방
-            data.Posts = data.Posts.length;
-            data.Followers = data.Posts.length;
-            data.Followings = data.Posts.length;
-
-            res.status(200).json(data);
-        }else{
-            res.status(404).send('존재하지않는 사용자입니다.');
-        }
-        
-    }catch(error){
-        console.error(error);
-        next(error);
-    }
-});
-
-// 특정 사용자 게시글 가져오기
-router.get('/:userId/posts', async (req, res, next) => { 
-    try{
-        const where = { UserId: rea.params.userId };
-
-        if(parseInt(req.query.lastId, 10)){ 
-            where.id = { [Op.lt]: parseInt(req.query.lastId, 10) }
-        }
-
-        const posts = await Post.findAll({
-            where,
-            limit: 10,
-            order: [
-                [ 'createdAt', 'DESC' ],
-                [Comment, 'createdAt', 'DESC' ],
-            ],
-            include: [{
-                model: User,
-                attributes: [ 'id', 'nickname' ],
-            },{
-                model: Image,
-            },{
-                model: Comment,
-                include: [{
-                    model: User,
-                    attributes: [ 'id', 'nickname' ],
-                }],
-            },{
-                model: User,
-                as: 'Likers',
-                attributes: [ 'id' ],
-            },{
-                model: Post,
-                as: 'Retweet',
-                include: [{
-                    model: User,
-                    attributes: [ 'id', 'nickname' ],
-                },{
-                    model: Image,
-                }]
-            },],
-        });
-
-        res.status(200).json(posts);
-
-    }catch(error){
-        console.error(error);
-        next(error);
-    }
-});
 
 // async await 으로 만들어야함
 // 안붙여도 데이터가 들어가기는 하는데,
@@ -278,36 +186,42 @@ router.patch('/nickname', isLoggedIn, async(req, res, next) => {
     }
 });
 
-router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
+// 라우터가 있는데 왜 404가 뜰까
+// 미들웨어는 위에서 아래로, 왼쪽에서 오른쪽으로 찾는다.
+// 상단에 /:userId 라우터가 있는데,
+// 여기서 호출 시 followers같은 키워드를 userId로 인식해버린다.. => 에러가난다.! 황당!!
+// params를 와일드카드라고 부르는데, 이런 params는 가장 아래로 내려두는게 좋다...
+router.get('/followers', isLoggedIn, async (req, res, next) => {
     try{
-
-        const user = await User.findOne({ where: { id: req.params.userId }});
-
+        const user = await User.findOne({ where: { id: req.user.id }});
         if(!user){
-            res.status(403).send('없는 사람은 팔로우할 수 없습니다.');
+            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
         }
 
-        await user.addFollowers(req.user.id);
-        
-        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+        const followers = await user.getFollowers({
+            limit: parseInt(req.query.limit, 10),
+        });
+        res.status(200).json(followers);
+
     }catch(error){
         console.error(error);
         next(error);
     }
 });
 
-
-router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+router.get('/followings', isLoggedIn, async (req, res, next) => {
     try{
-        const user = await User.findOne({ where: { id: req.params.userId }});
-
+        const user = await User.findOne({ where: { id: req.user.id }});
         if(!user){
-            res.status(403).send('없는 사람은 언팔로우할 수 없습니다.');
+            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
         }
 
-        await user.removeFollowers(req.user.id);
+        const followings = await user.getFollowings({
+            limit: parseInt(req.query.limit, 10),
+        });
         
-        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+        res.status(200).json(followings);
+
     }catch(error){
         console.error(error);
         next(error);
@@ -331,16 +245,92 @@ router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
     }
 });
 
-
-router.get('/followers', isLoggedIn, async (req, res, next) => {
+// 특정 유저 정보 가져오기
+router.get('/:userId', async (req, res, next) => {
     try{
-        const user = await User.findOne({ where: { id: req.user.id }});
-        if(!user){
-            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
+        const fullUserWithoutPassword = await User.findOne({
+            where: { id: req.params.userId },
+            attributes: {
+                exclude: [ 'password' ]
+            },
+            include: [{ 
+                model: Post ,
+                attributes: [ 'id' ],
+            },{ 
+                model: User,
+                as: 'Followings',
+                attributes: [ 'id' ],
+            },{ 
+                model: User,
+                as: 'Followers', 
+                attributes: [ 'id' ],
+            }]
+        });
+
+        if(fullUserWithoutPassword){
+            // squelize데이터 json으로 변환(가공하려면 해야함)
+            const data = fullUserWithoutPassword.toJSON();
+            
+            // 개인정보 침해 예방
+            data.Posts = data.Posts.length;
+            data.Followers = data.Posts.length;
+            data.Followings = data.Posts.length;
+
+            res.status(200).json(data);
+        }else{
+            res.status(404).send('존재하지않는 사용자입니다.');
+        }
+        
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+// 특정 사용자 게시글 가져오기
+router.get('/:userId/posts', async (req, res, next) => { 
+    try{
+        const where = { UserId: rea.params.userId };
+
+        if(parseInt(req.query.lastId, 10)){ 
+            where.id = { [Op.lt]: parseInt(req.query.lastId, 10) }
         }
 
-        const followers = await user.getFollowers();
-        res.status(200).json(followers);
+        const posts = await Post.findAll({
+            where,
+            limit: 10,
+            order: [
+                [ 'createdAt', 'DESC' ],
+                [Comment, 'createdAt', 'DESC' ],
+            ],
+            include: [{
+                model: User,
+                attributes: [ 'id', 'nickname' ],
+            },{
+                model: Image,
+            },{
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                }],
+            },{
+                model: User,
+                as: 'Likers',
+                attributes: [ 'id' ],
+            },{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                },{
+                    model: Image,
+                }]
+            },],
+        });
+
+        res.status(200).json(posts);
 
     }catch(error){
         console.error(error);
@@ -348,16 +338,37 @@ router.get('/followers', isLoggedIn, async (req, res, next) => {
     }
 });
 
-router.get('/followings', isLoggedIn, async (req, res, next) => {
+// 팔로우
+router.patch('/:userId/follow', isLoggedIn, async (req, res, next) => {
     try{
-        const user = await User.findOne({ where: { id: req.user.id }});
+
+        const user = await User.findOne({ where: { id: req.params.userId }});
+
         if(!user){
-            res.status(403).send('없는 사람을 팔로우 하려고 하시네요?')
+            res.status(403).send('없는 사람은 팔로우할 수 없습니다.');
         }
 
-        const followings = await user.getFollowings();
-        res.status(200).json(followings);
+        await user.addFollowers(req.user.id);
+        
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
 
+// 언팔로우
+router.delete('/:userId/follow', isLoggedIn, async (req, res, next) => {
+    try{
+        const user = await User.findOne({ where: { id: req.params.userId }});
+
+        if(!user){
+            res.status(403).send('없는 사람은 언팔로우할 수 없습니다.');
+        }
+
+        await user.removeFollowers(req.user.id);
+        
+        res.status(200).json({ UserId: parseInt(req.params.userId, 10) });
     }catch(error){
         console.error(error);
         next(error);

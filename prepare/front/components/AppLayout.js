@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import Router from 'next/router';
 import styled, { createGlobalStyle } from 'styled-components';
+import useInput from '../hooks/useInput';
 
 // js 작업 시에 props 체크... typescript일 경우 필요없다.
 // prop으로 넘기는 애들을 prop-types로 체크
@@ -41,12 +43,19 @@ const Global = createGlobalStyle`
 
 // 다른 컴포넌트를 커스텀하려고 하면 styled에 넣어서 넘겨준다.
 // 해당 className 관련 콘솔에러는 추후 강의에서 해결한다고 함.
-const InputSearch = styled(Input.Search)`
+const SearchInput = styled(Input.Search)`
     vertical-align: middle;
 `;
 
 const AppLatout = ({ children }) => {
+    const [ searchInput, onChangeSearchInput ] = useInput('');
     const { me } = useSelector((state) => state.user);
+
+    // 예전엔 as같은거? 썼어야한다는데
+    // next@9에서 간단해졌다함!
+    const onSearch = useCallback(() => {
+        Router.push(`/hashtag/${searchInput}`);
+    }, [searchInput]);
 
     return(
         <div>
@@ -61,7 +70,12 @@ const AppLatout = ({ children }) => {
                     <Link href="/profile"><a>프로필</a></Link>
                 </Menu.Item>
                 <Menu.Item>
-                    <InputSearch enterButton />
+                    <SearchInput 
+                        enterButton 
+                        value={searchInput}
+                        onChange={onChangeSearchInput}
+                        onSearch={onSearch}
+                    />
                 </Menu.Item>
                 <Menu.Item>
                     <Link href="/signup"><a>회원가입</a></Link>

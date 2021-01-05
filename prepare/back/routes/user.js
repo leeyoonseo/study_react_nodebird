@@ -228,6 +228,7 @@ router.get('/followings', isLoggedIn, async (req, res, next) => {
     }
 });
 
+// 차단
 router.delete('/follower/:userId', isLoggedIn, async (req, res, next) => {
     try{
         const user = await User.findOne({ where: { id: req.params.userId }});

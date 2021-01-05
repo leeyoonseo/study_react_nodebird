@@ -256,8 +256,8 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;            
             
         case ADD_COMMENT_SUCCESS: {
-            const post = drafactiont.mainPosts.find((v) => v.id === action.data.PostId);
-            post.Comments.unshift(action.data);
+            const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+            post.Comments.unshift(post);
             draft.addCommentLoading = false;
             draft.addCommentDone = true;
             break;

@@ -124,9 +124,33 @@ router.post('/', isLoggedIn, upload.none(), async (req, res, next) => {
     }
 });
 
-// postId 파라미터
-router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
+// 이미지 업로드 용 라우터 
+// array가 아닌 하나의 이미지일 경우에는 upload.single('image')를 쓰면된다.
+// json, text일 경우에는 upload.none이면된다.
+// file input이 두개이상일 경우에는 upload.fields
+// 참고: https://www.zerocho.com/category/NodeJS/post/5950a6c4f7934c001894ea83
+router.post('/images', isLoggedIn, upload.array('image'), async (req, res, next) => {
+    // console.log(req.files);
+
     try{
+
+        // 어디에 업로드가 되었는지 파일명 전달
+        res.json(req.files.map((v) => v.filename));
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+
+// postId 파라미터
+router.post('/:postId/comment', isLoggedIn, async (req, res, next) => { // POST /post/123/comment
+    try{
+        // data: { 
+        //     content: commentText, 
+        //     postId: post.id, 
+        //     userId: id 
+        // }
 
         // 프론트, 브라우저는 믿을게 못되서 철저히 검사해서
         // 해당 코멘트가 등록한 사용자가 맞는지 검사해야한다.
@@ -141,10 +165,8 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
 
         const comment = await Comment.create({
             content: req.body.content,
-
-            // req.body로 접근가능하기도 하나 params가 좀더 명확
             PostId: parseInt(req.params.postId, 10),
-            UserId: req.user.id,
+            UserId: req.body.userId,
         });
 
         const fullComment = await Comment.findOne({
@@ -153,7 +175,7 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
                 model: User,
                 attributes: [ 'id', 'nickname' ],
             }]
-        })
+        });
 
         res.status(201).json(fullComment);
 
@@ -163,18 +185,68 @@ router.post('/:postId/comment', isLoggedIn, async (req, res, next) => {
     }
 });
 
-// 이미지 업로드 용 라우터 
-// array가 아닌 하나의 이미지일 경우에는 upload.single('image')를 쓰면된다.
-// json, text일 경우에는 upload.none이면된다.
-// file input이 두개이상일 경우에는 upload.fields
-// 참고: https://www.zerocho.com/category/NodeJS/post/5950a6c4f7934c001894ea83
-router.post('/images', isLoggedIn, upload.array('image'), async (req, res, next) => {
-    // console.log(req.files);
-
+router.get('/:postId', async (req, res, next) => { // GET /post/1
     try{
+        const post = await Post.findOne({
+            where: { id: req.params.postId },
+        });
 
-        // 어디에 업로드가 되었는지 파일명 전달
-        res.json(req.files.map((v) => v.filename));
+        if(!post){
+            return res.status(404).send('존재하지 않는 게시글입니다.');
+        }
+
+        const fullPost = await Post.findOne({
+            where: { id: post.id },
+            include: [{
+                model: Post,
+                as: 'Retweet',
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                },{
+                    model: Image,
+                }]
+            },{
+                model: User,
+                attributes: [ 'id', 'nickname' ],
+            },{
+                model: User,
+                as: 'Likers',
+                attributes: [ 'id' ],
+            },{
+                model: Image,
+            },{
+                model: Comment,
+                include: [{
+                    model: User,
+                    attributes: [ 'id', 'nickname' ],
+                }]
+            }]
+        });
+
+        res.status(200).json(fullPost);
+
+    }catch(error){
+        console.error(error);
+        next(error);
+    }
+});
+
+router.delete('/:postId', isLoggedIn, async (req, res, next) => {
+    try{
+        await Post.destroy({
+            where: { 
+                id: req.params.postId, 
+                
+                // 삭제 시 보안을 철저히 (내가 등록한 게시글만 지우도록)
+                UserId: req.user.id,
+            },
+        });
+
+        res.status(200).json({
+            PostId: parseInt(req.params.postId, 10)
+        });
+
     }catch(error){
         console.error(error);
         next(error);
@@ -222,27 +294,6 @@ router.delete('/:postId/like', isLoggedIn, async (req, res, next) => {
             UserId: req.user.id 
         });
         
-    }catch(error){
-        console.error(error);
-        next(error);
-    }
-});
-
-router.delete('/:postId', isLoggedIn, async (req, res, next) => {
-    try{
-        await Post.destroy({
-            where: { 
-                id: req.params.postId, 
-                
-                // 삭제 시 보안을 철저히 (내가 등록한 게시글만 지우도록)
-                UserId: req.user.id,
-            },
-        });
-
-        res.status(200).json({
-            PostId: parseInt(req.params.postId, 10)
-        });
-
     }catch(error){
         console.error(error);
         next(error);
@@ -322,53 +373,6 @@ router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => {
         });
 
         res.status(201).json(retweetWithPrevPost);
-
-    }catch(error){
-        console.error(error);
-        next(error);
-    }
-});
-
-router.get('/:postId', async (req, res, next) => { // GET /post/1
-    try{
-        const post = await Post.findOne({
-            where: { id: req.params.postId },
-        });
-
-        if(!post){
-            return res.status(404).send('존재하지 않는 게시글입니다.');
-        }
-
-        const fullPost = await Post.findOne({
-            where: { id: post.id },
-            include: [{
-                model: Post,
-                as: 'Retweet',
-                include: [{
-                    model: User,
-                    attributes: [ 'id', 'nickname' ],
-                },{
-                    model: Image,
-                }]
-            },{
-                model: User,
-                attributes: [ 'id', 'nickname' ],
-            },{
-                model: User,
-                as: 'Likers',
-                attributes: [ 'id' ],
-            },{
-                model: Image,
-            },{
-                model: Comment,
-                include: [{
-                    model: User,
-                    attributes: [ 'id', 'nickname' ],
-                }]
-            }]
-        });
-
-        res.status(200).json(fullPost);
 
     }catch(error){
         console.error(error);

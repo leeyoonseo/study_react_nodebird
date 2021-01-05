@@ -33,6 +33,7 @@ function* loadPosts(action){
             data: result.data,
         });
     } catch(err){
+        console.error(error);
         yield put({
             type: LOAD_POSTS_FAILURE,
             error: err.response.data,
@@ -53,6 +54,7 @@ function* loadUserPosts(action){
             data: result.data,
         });
     } catch(err){
+        console.error(error);
         yield put({
             type: LOAD_USER_POSTS_FAILURE,
             error: err.response.data,
@@ -75,6 +77,7 @@ function* loadHashtagPosts(action){
             data: result.data,
         });
     } catch(err){
+        console.error(error);
         yield put({
             type: LOAD_HASHTAG_POSTS_FAILURE,
             error: err.response.data,
@@ -95,6 +98,7 @@ function* loadPost(action){
             data: result.data,
         });
     } catch(err){
+        console.error(error);
         yield put({
             type: LOAD_POST_FAILURE,
             error: err.response.data,
@@ -121,6 +125,7 @@ function* addPost(action){
         })
 
     } catch(err){
+        console.error(error);
         yield put({
             type: ADD_POST_FAILURE,
             error: err.response.data,
@@ -148,6 +153,7 @@ function* removePost(action){
         })
 
     } catch(err){
+        console.error(error);
         yield put({
             type: REMOVE_POST_FAILURE,
             error: err.response.data,
@@ -156,21 +162,28 @@ function* removePost(action){
 }
 
 function addCommentAPI(data){
-    // 주소는 약속... 아무렇게나 만들어도되나 의미가있는게 보통
-    // 따라서 id를 사용해서 작업
+    // /post/137/comment
     return axios.post(`/post/${data.postId}/comment`, data);
 }
 
 function* addComment(action){
     try{
+        console.log(action.data); // 144
+        // data: { 
+        //     content: commentText, 
+        //     postId: post.id,  // 144
+        //     userId: id 
+        // }
         const result = yield call(addCommentAPI, action.data);
-        
+
+        console.log("result.data",result.data);
         yield put({
             type: ADD_COMMENT_SUCCESS,
             data: result.data,
         });
 
     } catch(err){
+        console.error(error);
         yield put({
             type: ADD_COMMENT_FAILURE,
             error: err.response.data,
@@ -195,6 +208,7 @@ function* unlikePost(action){
         });
 
     } catch(err){
+        console.error(error);
         yield put({
             type: UNLIKE_POST_FAILURE,
             error: err.response.data,
@@ -218,6 +232,7 @@ function* likePost(action){
         });
 
     } catch(err){
+        console.error(error);
         yield put({
             type: LIKE_POST_FAILURE,
             error: err.response.data,
@@ -240,6 +255,7 @@ function* uploadImages(action){
         });
 
     } catch(err){
+        console.error(error);
         yield put({
             type: UPLOAD_IMAGES_FAILURE,
             error: err.response.data,
@@ -261,6 +277,7 @@ function* retweet(action){
         });
 
     } catch(err){
+        console.error(error);
         yield put({
             type: RETWEET_FAILURE,
             error: err.response.data,

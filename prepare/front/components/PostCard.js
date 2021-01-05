@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { RetweetOutlined, HeartOutlined, HeartTwoTone, MessageOutlined, EllipsisOutlined } from '@ant-design/icons';
+import Link from 'next/link';
 
 import CommentForm from './CommentForm';
 import PostImages from './PostImages';
@@ -19,7 +20,7 @@ import {
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
-    const [commentFormOpend, setCommentFormOpend] = useState(false);
+    const [ commentFormOpend, setCommentFormOpend ] = useState(false);
     // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
     // const { me } = useSelector((state) => state.user);
     // const id = me?.id;
@@ -127,14 +128,22 @@ const PostCard = ({ post }) => {
                     ? (
                         <Card cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images} />}>
                             <Card.Meta
-                                avatar={<Avatar>{post.Retweet.User.nickname[0]}</Avatar>}
+                                avatar={(
+                                    <Link href={`/user/${post.Retweet.User.id}`}>
+                                        <a><Avatar>{post.Retweet.User.nickname[0]}</Avatar></a>
+                                    </Link>
+                                )}
                                 title={post.Retweet.User.nickname}
                                 description={<PostCardContent postData={post.Retweet.content} />}
                             />
                         </Card>   
                     ) : (
                         <Card.Meta
-                            avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+                            avatar={(
+                                <Link href={`/user/${post.User.id}`}>
+                                    <a><Avatar>{post.User.nickname[0]}</Avatar></a>
+                                </Link>
+                            )}
                             title={post.User.nickname}
                             description={<PostCardContent postData={post.content} />}
                         />
@@ -154,7 +163,11 @@ const PostCard = ({ post }) => {
                             <li>
                                 <Comment 
                                     author={item.User.nickname}
-                                    avatar={<Avatar>{item.User.nickname[0]}</Avatar>}
+                                    avatar={(
+                                        <Link href={`/user/${item.User.id}`}>
+                                            <a><Avatar>{item.User.nickname[0]}</Avatar></a>
+                                        </Link>
+                                    )}
                                     content={item.content}                                
                                 />
                             </li>

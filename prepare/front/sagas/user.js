@@ -148,14 +148,13 @@ function* removeFollower(action){
 }
 
 function loadMyInfoAPI(){
-    // 쿠키로만 작업
     // get, delete는 데이터가 없으므로 2번째 인자가 옵션자리
     return axios.get('/user');
 }
 
-function* loadMyInfo(action){
+function* loadMyInfo(){
     try{
-        const result = yield call(loadMyInfoAPI, action.data);
+        const result = yield call(loadMyInfoAPI);
         yield put({
             type: LOAD_MY_INFO_SUCCESS,
             data: result.data,

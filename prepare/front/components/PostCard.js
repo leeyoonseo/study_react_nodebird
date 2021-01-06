@@ -21,10 +21,6 @@ const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
     const [ commentFormOpend, setCommentFormOpend ] = useState(false);
-    // ?.은 새로생긴 문법이다. 있을 경우 값이 들어가고 아니면 undefined가 들어가는 옵셔닝체이닝 연산자
-    // const { me } = useSelector((state) => state.user);
-    // const id = me?.id;
-    // 아니면 이렇게 한번에 해결
     const id = useSelector((state) => state.user.me?.id);
 
     const onLike = useCallback(() => {
@@ -36,7 +32,7 @@ const PostCard = ({ post }) => {
             type: LIKE_POST_REQUEST,
             data: post.id,
         });
-    }, []);
+    }, [id]);
 
     const onUnlike = useCallback(() => {
         if(!id){
@@ -47,7 +43,7 @@ const PostCard = ({ post }) => {
             type: UNLIKE_POST_REQUEST,
             data: post.id,
         });
-    }, []);
+    }, [id]);
 
     const onToggleComment = useCallback(() => {
         setCommentFormOpend((prev) => !prev);
@@ -62,7 +58,7 @@ const PostCard = ({ post }) => {
             type: REMOVE_POST_REQUEST,
             data: post.id,
         })    
-    }, []);
+    }, [id]);
 
     const onRetweet = useCallback(() => {
         // 프론트, 서버 둘다 모두 처리
@@ -75,7 +71,7 @@ const PostCard = ({ post }) => {
             data: post.id,
         });
 
-    }, [ id ]);
+    }, [id]);
 
     const liked = post.Likers.find((v) => v.id === id);
 

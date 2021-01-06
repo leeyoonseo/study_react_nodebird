@@ -18,6 +18,7 @@ const NodeBird = ({ Component }) => {
             {/* 공통되지 않는 head라면 index에 넣으면된다. */}
             <Head>
                 <meta charSet="utf-8" />
+                <link rel="shortcut icon" herf="/favicon.png" />
                 <title>NodeBird</title>
             </Head>
             <Component />

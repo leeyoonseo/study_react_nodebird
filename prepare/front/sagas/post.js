@@ -163,17 +163,19 @@ function* removePost(action){
 
 function addCommentAPI(data){
     // /post/137/comment
-    return axios.post(`/post/${data.postId}/comment`, data);
+    return axios.post(`/post/${data.PostId}/comment`, data);
 }
 
 function* addComment(action){
     try{
-        console.log(action.data); // 144
         // data: { 
         //     content: commentText, 
-        //     postId: post.id,  // 144
-        //     userId: id 
+        //     PostId: post.id,  // 144
+        //     UserId: id 
         // }
+
+        console.log("action.data",action.data);
+
         const result = yield call(addCommentAPI, action.data);
 
         console.log("result.data",result.data);

@@ -9,7 +9,7 @@ import { ServerStyleSheet } from 'styled-components';
 export default class MyDocument extends Document {
     // document, app에서 쓰는 특수하게 사용한다고 생각하면 편함
     // 다른데서는 보통 getServerSideProps나 getStaticProps를 쓴다고함..
-    static async getInitalProps(ctx){
+    static async getInitialProps(ctx){
 
         // 로직은 styled-components에서 사용방법보고 했다함
         const sheet = new ServerStyleSheet();
@@ -18,7 +18,7 @@ export default class MyDocument extends Document {
         try{
             // 서버사이드 렌더링 부분?
             ctx.renderPage = () => originalRenderPage({
-                enhanceApp: (App) => (props) => sheet.collectStyles(<App {...props} />),
+                enhanceApp: APP => props => sheet.collectStyles(<App {...props} />),
             });
 
             const initialProps = await Document.getInitialProps(ctx);
@@ -31,9 +31,6 @@ export default class MyDocument extends Document {
                     </>
                 ),
             };
-        }catch(error){
-            console.error(error);
-
         }finally{
             sheet.seal();
         }

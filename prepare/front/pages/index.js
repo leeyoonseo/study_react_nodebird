@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { END } from 'redux-saga';
-import AppLatout from "../components/AppLayout";
+import AppLayout from "../components/AppLayout";
 import PostForm from "../components/PostForm";
 import PostCard from "../components/PostCard";
 import { LOAD_POSTS_REQUEST } from '../reducers/post';
@@ -47,10 +47,10 @@ const Home = () => {
     }, [hasMorePosts, loadPostsLoading, mainPosts]);
 
     return(
-        <AppLatout>
+        <AppLayout>
             { me && <PostForm /> }
-            { mainPosts.map((post, i) => <PostCard key={`${post.id}_${i}`} post={post} />)}
-        </AppLatout>
+            { mainPosts.map((post) => <PostCard key={post.id} post={post} />)}
+        </AppLayout>
     );
 }
 

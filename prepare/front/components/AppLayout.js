@@ -60,8 +60,6 @@ const AppLatout = ({ children }) => {
     return(
         <div>
             <Global />
-            
-            {/* antd menu 레이아웃 추가 */}
             <Menu mode="horizontal">
                 <Menu.Item>
                     <Link href="/"><a>노드버드</a></Link>
@@ -83,10 +81,7 @@ const AppLatout = ({ children }) => {
             </Menu>
 
             {/* tip 모바일 디자인을 먼저, 테블릿->데탑까지해야 쉽다. */}
-
-            {/* 컬럼간의 간격을 gutter 
-                이것때문에 antd 버그가 발생하는데, (가로 스크롤 생기는것..)
-            */}
+            {/* 컬럼간의 간격을 gutter , 이것때문에 antd 버그가 발생하는데, (가로 스크롤 생기는것..) */}
             <Row gutter={8}>
                 {/* 
                     반응형 컬럼 https://ant.design/components/grid/#header

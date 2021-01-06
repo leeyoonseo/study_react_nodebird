@@ -8,7 +8,7 @@ import AppLayout from '../components/AppLayout';
 import wrapper from '../store/configureStore';
 import { LOAD_USER_REQUEST } from '../reducers/user';
 
-const About = () => {
+const Profile = () => {
     const { userInfo } = useSelector((state) => state.user);
 
     return(
@@ -16,37 +16,35 @@ const About = () => {
             <Head>
                 <title>홍길동 | NodeBird</title>
             </Head>
-            {
-                userInfo ? (
-                    <Card
-                        actions={[
-                            <div key="twit">
-                                짹짹
-                                <br/>
-                                {userInfo.Posts}
-                            </div>,
-                            <div key="following">
-                                팔로잉
-                                <br/>
-                                {userInfo.Followings}
-                            </div>,
-                            <div key="follower">
-                                팔로워
-                                <br/>
-                                {userInfo.Followers}
-                            </div>
-                        ]}
-                    >
-                        <Card.Meta
-                            avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
-                            title={userInfo.nickname}
-                            description="노드버드 매니아"
-                        />
-                    </Card>
-                ) 
-                :
-                null
-            }
+            {userInfo ? (
+                <Card
+                    actions={[
+                        <div key="twit">
+                            짹짹
+                            <br/>
+                            {userInfo.Posts}
+                        </div>,
+                        <div key="following">
+                            팔로잉
+                            <br/>
+                            {userInfo.Followings}
+                        </div>,
+                        <div key="follower">
+                            팔로워
+                            <br/>
+                            {userInfo.Followers}
+                        </div>
+                    ]}
+                >
+                    <Card.Meta
+                        avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
+                        title={userInfo.nickname}
+                        description="노드버드 매니아"
+                    />
+                </Card>
+            ) 
+            :
+            null}
         </AppLayout>
     );
 }
@@ -65,7 +63,7 @@ export const getStaticProps = wrapper.getStaticProps(async (context) => {
     // 특정 사용자 정보 가져오기
     context.store.dispatch({
         type: LOAD_USER_REQUEST,
-        data: 2,
+        data: 1,
     });
 
     // success 까지 대기, 사용방법 외우기
@@ -73,4 +71,4 @@ export const getStaticProps = wrapper.getStaticProps(async (context) => {
     await context.store.sagaTask.toPromise();
 });
 
-export default About;
+export default Profile;

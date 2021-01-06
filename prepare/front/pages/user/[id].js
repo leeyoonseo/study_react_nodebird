@@ -23,7 +23,7 @@ const User = () => {
 
     useEffect(() => {
         const onScroll = () => {
-            if(window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300){
+            if (window.pageYOffset + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300) {
                 if(hasMorePosts && !loadPostsLoading){
                     dispatch({
                         type: LOAD_USER_POSTS_REQUEST,
@@ -41,48 +41,48 @@ const User = () => {
 
     return(
         <AppLayout>
-            <Head>
-                <title>
-                    {userInfo.nickname}님의 글
-                </title>
-                <meta name="description" content={`${userInfo.nickname}님의 글`} />
-                <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
-                <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
-                <meta property="og:image" content="http://nodebird.com/favicon.png" />
-                <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
-            </Head>
+            {userInfo && (
+                <Head>
+                    <title>
+                        {userInfo.nickname}님의 글
+                    </title>
+                    <meta name="description" content={`${userInfo.nickname}님의 글`} />
+                    <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
+                    <meta property="og:image" content="http://nodebird.com/favicon.png" />
+                    <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
+                </Head>
+            )}
 
-            {
-                userInfo ? (
-                    <Card
-                        actions={[
-                            <div key="twit">
-                                짹짹
-                                <br/>
-                                {userInfo.Posts}
-                            </div>,
-                            <div key="following">
-                                팔로잉
-                                <br/>
-                                {userInfo.Followings}
-                            </div>,
-                            <div key="follower">
-                                팔로워
-                                <br/>
-                                {userInfo.Followers}
-                            </div>,
-                        ]}
-                    >
-                        <Card.Meta 
-                            avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
-                            title={userInfo.nickname}
-                        />
-                    </Card>
-                ) : null
-            }
+            {userInfo ? (
+                <Card
+                    actions={[
+                        <div key="twit">
+                            짹짹
+                            <br/>
+                            {userInfo.Posts}
+                        </div>,
+                        <div key="following">
+                            팔로잉
+                            <br/>
+                            {userInfo.Followings}
+                        </div>,
+                        <div key="follower">
+                            팔로워
+                            <br/>
+                            {userInfo.Followers}
+                        </div>,
+                    ]}
+                >
+                    <Card.Meta 
+                        avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
+                        title={userInfo.nickname}
+                    />
+                </Card>
+            ) : null}
 
-            {mainPosts.map((c) => (
-                <PostCard key={c.id} post={c} />
+            {mainPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
             ))}
         </AppLayout>
     );

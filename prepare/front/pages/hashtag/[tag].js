@@ -19,8 +19,6 @@ const Hashtag = () => {
     const { tag } = router.query;
     const { mainPosts, hasMorePosts, loadPostsLoading } = useSelector((state) => state.post);
 
-    const { userInfo } = useSelector((state) => state.user);
-
     useEffect(() => {
         const onScroll = () => {
             if(window.scrollY + document.documentElement.clientHeight > document.documentElement.scrollHeight - 300){
@@ -41,43 +39,6 @@ const Hashtag = () => {
 
     return(
         <AppLayout>
-            <Head>
-                <title>{`해시태그 '${tag}' 글`}</title>
-                <meta name="description" content={`해시태그 '${tag}' 글`} />
-                <meta property="og:title" content={`해시태그 '${tag}' 글`} />
-                <meta property="og:description" content={`해시태그 '${tag}' 글`} />
-                <meta property="og:image" content="http://nodebird.com/favicon.png" />
-                <meta property="og:url" content={`https://nodebird.com/user/${tag}`} />
-            </Head>
-            {
-                userInfo ? (
-                    <Card
-                        actions={[
-                            <div key="twit">
-                                짹짹
-                                <br/>
-                                {userInfo.Posts}
-                            </div>,
-                            <div key="following">
-                                팔로잉
-                                <br/>
-                                {userInfo.Followings}
-                            </div>,
-                            <div key="follower">
-                                팔로워
-                                <br/>
-                                {userInfo.Followers}
-                            </div>,
-                        ]}
-                    >
-                        <Card.Meta 
-                            avatar={<Avatar>{userInfo.nickname[0]}</Avatar>}
-                            title={userInfo.nickname}
-                        />
-                    </Card>
-                ) : null
-            }
-
             {mainPosts.map((c) => (
                 <PostCard key={c.id} post={c} />
             ))}
@@ -94,12 +55,12 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
     }
 
     context.store.dispatch({
-        type: LOAD_HASHTAG_POSTS_REQUEST,
-        data: context.params.tag,
+        type: LOAD_MY_INFO_REQUEST,
     });
 
     context.store.dispatch({
-        type: LOAD_MY_INFO_REQUEST,
+        type: LOAD_HASHTAG_POSTS_REQUEST,
+        data: context.params.tag,
     });
 
     context.store.dispatch(END);

@@ -13,8 +13,6 @@ axios.defaults.baseURL = 'http://localhost:3065';
 // 하지만 이 모드 true일 경우에는 보안때문에 origin *하면안됨 정확한 주소적어야함
 axios.defaults.withCredentials = true;
 
-
-
 export default function* rootSaga(){
     yield all([
         fork(userSaga),

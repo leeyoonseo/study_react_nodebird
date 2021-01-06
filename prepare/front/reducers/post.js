@@ -221,9 +221,9 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             break;        
 
         case ADD_POST_SUCCESS:
-            draft.mainPosts.unshift(action.data);
             draft.addPostLoading = false;
             draft.addPostDone = true;
+            draft.mainPosts.unshift(action.data);
             draft.imagePaths = [];
             break;
 
@@ -285,6 +285,9 @@ const reducer = (state = initialState, action) => produce(state, (draft) =>{
             draft.uploadImagesLoading = false;
             draft.uploadImagesError = action.error;
             break; 
+
+        default:
+            break;    
     }
 });
 

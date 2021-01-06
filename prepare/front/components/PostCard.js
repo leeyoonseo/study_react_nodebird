@@ -20,7 +20,7 @@ import {
 const PostCard = ({ post }) => {
     const dispatch = useDispatch();
     const { removePostLoading } = useSelector((state) => state.post);
-    const [ commentFormOpend, setCommentFormOpend ] = useState(false);
+    const [ commentFormOpened, setcommentFormOpened ] = useState(false);
     const id = useSelector((state) => state.user.me?.id);
 
     const onLike = useCallback(() => {
@@ -46,7 +46,7 @@ const PostCard = ({ post }) => {
     }, [id]);
 
     const onToggleComment = useCallback(() => {
-        setCommentFormOpend((prev) => !prev);
+        setcommentFormOpened((prev) => !prev);
     }, []);
 
     const onRemovePost = useCallback(() => {
@@ -148,7 +148,7 @@ const PostCard = ({ post }) => {
                 
             </Card>
 
-            {commentFormOpend && (
+            {commentFormOpened && (
                 <div>
                     { id && <CommentForm post={post}/> }
                     <List 

@@ -22,9 +22,8 @@ import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
 const fetcher = (url) => axios.get(url, { withCredentials: true }).then((result) => result.data);
 
 const Profile = () => {
-    const { me } = useSelector((state) => state.user);
-    const [ followersLimit, setFollowersLimit ] = useState(3);
-    const [ followingsLimit, setFollowingsLimit ] = useState(3);
+    const [followersLimit, setFollowersLimit] = useState(3);
+    const [followingsLimit, setFollowingsLimit] = useState(3);
 
     // 1) fetcher => 첫번째 인자 주소를 어떻게 실제로 가져올 것인지에 대한 것
     // - 이거쓰면 dispatch나 LOAD_MY_INFO_REQUEST 액션 같은거 안만들어도됨
@@ -34,12 +33,14 @@ const Profile = () => {
     // - useEffect에 followersData의 id로 비교해서 기존 state에 concat하면 된다고 힌트를 줌....
     const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher);
     const { data: followingsData, error: followingError } = useSWR(`http://localhost:3065/user/followings?limit=${followingsLimit}`, fetcher);
+    
+    const { me } = useSelector((state) => state.user);
 
     useEffect(() => {
         if(!(me && me.id)){
             Router.push('/');
         }
-    }, [ me && me.id]);
+    }, [me && me.id]);
 
     const loadMoreFollowings = useCallback(() => {
         setFollowingsLimit((prev) => prev + 3);
@@ -49,13 +50,13 @@ const Profile = () => {
         setFollowersLimit((prev) => prev + 3);
     }, []);
 
-    if(!me){
-        return '내 정보 로딩중...';
-    }
-
     if(followerError || followingError){
         console.error(followerError || followingError);
         return <div>팔로잉/팔로워 로딩 중 에러가 발생합니다</div>
+    }
+
+    if(!me){
+        return '내 정보 로딩중...';
     }
 
     return(

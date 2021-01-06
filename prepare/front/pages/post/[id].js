@@ -1,6 +1,5 @@
 import React  from 'react';
 import { useSelector } from 'react-redux';
-
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import axios from 'axios';
@@ -14,9 +13,9 @@ import AppLayout from '../../components/AppLayout';
 import PostCard from '../../components/PostCard';
 
 const Post = () => {
-    const router = useRouter();
-    const { id } = router.query;
     const { singlePost } = useSelector((state) => state.post);
+    const { id } = router.query;
+    const router = useRouter();
 
     return(
         <AppLayout>

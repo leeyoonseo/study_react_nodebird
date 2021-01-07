@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Card, Popover, Button, Avatar, List, Comment } from 'antd';
 import { RetweetOutlined, HeartOutlined, HeartTwoTone, MessageOutlined, EllipsisOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import moment from 'moment';
 
 import CommentForm from './CommentForm';
 import PostImages from './PostImages';
@@ -15,6 +16,9 @@ import {
     REMOVE_POST_REQUEST,
     RETWEET_REQUEST,
 } from '../reducers/post';
+
+// 기본이 영어이기 때문에 한글로 설정해줘야함
+moment.locale('ko');
 
 // 구성 기획을 먼저 해보기
 const PostCard = ({ post }) => {
@@ -123,6 +127,11 @@ const PostCard = ({ post }) => {
                 {post.RetweetId && post.Retweet
                     ? (
                         <Card cover={post.Retweet.Images[0] && <PostImages images={post.Retweet.Images} />}>
+
+                            {/* moment()는 현재 날짜, 시간 */}
+                            {/* moment(post.createdAt)해주면 post.createdAt의 데이터가 알아서 moment의 객체로 바뀜 */}
+                            {/* format 메서드를 사용하면 조합하지 않아도 됨 => {new Date().getFullYear() + new Date().getMonth} */}
+                            <div style={{ float: 'right' }}>{moment(post.createdAt).fromNow()}</div>
                             <Card.Meta
                                 avatar={(
                                     <Link href={`/user/${post.Retweet.User.id}`}>
@@ -134,15 +143,18 @@ const PostCard = ({ post }) => {
                             />
                         </Card>   
                     ) : (
-                        <Card.Meta
-                            avatar={(
-                                <Link href={`/user/${post.User.id}`}>
-                                    <a><Avatar>{post.User.nickname[0]}</Avatar></a>
-                                </Link>
-                            )}
-                            title={post.User.nickname}
-                            description={<PostCardContent postData={post.content} />}
-                        />
+                        <>
+                            <div style={{ float: 'right' }}>{moment(post.createdAt).fromNow()}</div>
+                            <Card.Meta
+                                avatar={(
+                                    <Link href={`/user/${post.User.id}`}>
+                                        <a><Avatar>{post.User.nickname[0]}</Avatar></a>
+                                    </Link>
+                                )}
+                                title={post.User.nickname}
+                                description={<PostCardContent postData={post.content} />}
+                            />
+                        </>
                     )
                 }
                 

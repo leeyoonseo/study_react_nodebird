@@ -75,9 +75,6 @@ const AppLatout = ({ children }) => {
                         onSearch={onSearch}
                     />
                 </Menu.Item>
-                <Menu.Item>
-                    <Link href="/signup"><a>회원가입</a></Link>
-                </Menu.Item>
             </Menu>
 
             {/* tip 모바일 디자인을 먼저, 테블릿->데탑까지해야 쉽다. */}

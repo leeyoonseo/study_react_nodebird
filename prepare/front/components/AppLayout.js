@@ -48,7 +48,7 @@ const SearchInput = styled(Input.Search)`
 `;
 
 const AppLatout = ({ children }) => {
-    const [ searchInput, onChangeSearchInput ] = useInput('');
+    const [searchInput, onChangeSearchInput] = useInput('');
     const { me } = useSelector((state) => state.user);
 
     // 예전엔 as같은거? 썼어야한다는데

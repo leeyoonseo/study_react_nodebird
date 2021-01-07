@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { List, Button, Card } from 'antd';
@@ -56,7 +56,8 @@ const FollowList = ({ header, data, onClickMore, loading }) => {
 
 FollowList.propTypes = {
     header: PropTypes.string.isRequired,
-    data: PropTypes.array.isRequired,
+    // data: PropTypes.array.isRequired,
+    data: PropTypes.array,
     onClickMore: PropTypes.func.isRequired,
     loading: PropTypes.bool.isRequired,
 };

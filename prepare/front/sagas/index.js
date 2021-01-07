@@ -1,8 +1,8 @@
 import { all, fork } from 'redux-saga/effects';
 import axios from 'axios';
 
-import userSaga from './user';
 import postSaga from './post';
+import userSaga from './user';
 
 // 중복되는 주소를 baseURL로 작성하면 기본으로 axios가 적용해줌
 axios.defaults.baseURL = 'http://localhost:3065';
@@ -13,9 +13,9 @@ axios.defaults.baseURL = 'http://localhost:3065';
 // 하지만 이 모드 true일 경우에는 보안때문에 origin *하면안됨 정확한 주소적어야함
 axios.defaults.withCredentials = true;
 
-export default function* rootSaga(){
+export default function* rootSaga() {
     yield all([
-        fork(userSaga),
         fork(postSaga),
+        fork(userSaga),
     ]);
 }

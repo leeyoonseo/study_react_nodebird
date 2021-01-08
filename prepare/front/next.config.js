@@ -5,7 +5,7 @@
 
 // ANALYZER 변수가 true여야 실행됨.
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZER === 'true',
+    enabled: process.env.ANALYZE === 'true',
 });
 
 module.exports = withBundleAnalyzer({
@@ -17,7 +17,10 @@ module.exports = withBundleAnalyzer({
     // config를 통해 기본 설정을 바꾸는 형식으로 진행
     webpack(config, { webpack }){
         const prod = process.env.NODE_ENV === 'production';
-        const plugins = [...config.plugins];
+        const plugins = [
+            ...config.plugins,
+            new webpack.ContextReplacementPlugin(/moment[\//]locale$/, /^\.\/ko$/),
+        ];
 
         // if(prod){
         //     // compresion-webpack-plugin은 내장되어서 더 이상 설치할 필요가 없음

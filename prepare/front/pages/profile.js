@@ -87,6 +87,15 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
     });
     context.store.dispatch(END);
     await context.store.sagaTask.toPromise();
+
+    // swr에서 서버사이드 가능!
+    // 3번째 인수로 initialData를 보내면되는데...
+    // 아래와 같이 return 데이터를 전달하면... HOME의 인자로 전달할 수 있다. 
+    // const Profile = ({data}) => { //... } 이렇게 전달받은 데이터를
+    // const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher);
+    // const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher, data);
+    // fetcher다음에 세번째 인자로 data를 전달하면 swr도 서버사이드 렌더링이 된다.
+    // return { props: { data: 123 } }
 });
 
 export default Profile;

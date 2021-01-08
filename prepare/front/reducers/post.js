@@ -1,7 +1,8 @@
 
 // immer
 // 불변성 지옥에서 구원할지다.
-// 다른 스타일로 코딩해보기 https://immerjs.github.io/immer/docs/curried-produce
+// 다른 스타일로 코딩해보기 https://immerjs.github.io/immer/docs/curried-produce/
+// immer가 IE에서 동작안하는데, 이것을 지원하기위한 작업이 필요하다(IE11)
 import produce from '../util/produce';
 
 export const initialState = {

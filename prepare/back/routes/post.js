@@ -324,12 +324,12 @@ router.delete('/:postId/like', isLoggedIn, async (req, res, next) => { // DELETE
     }
 });
 
-// 삭제 시 보안을 철저히 (내가 등록한 게시글만 지우도록)
 router.delete('/:postId', isLoggedIn, async (req, res, next) => { // DELETE /post/10
     try {
         await Post.destroy({
             where: {
                 id: req.params.postId,
+                // 삭제 시 보안을 철저히 (내가 등록한 게시글만 지우도록)
                 UserId: req.user.id,
             },
         });

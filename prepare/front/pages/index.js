@@ -85,6 +85,12 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
     context.store.dispatch(END);
     // store에서 sagaTask 등록해뒀음...
     await context.store.sagaTask.toPromise();
+
+    // swr에서 서버사이드 가능!
+    // 3번째 인수로 initialData를 보내면되는데...
+    // 아래와 같이 return 데이터를 전달하면... HOME의 인자로 전달할 수 있다. 
+    // const HOME = ({data}) => { //... }
+    // return { props: { data: 123 } }
 });
 
 export default Home;

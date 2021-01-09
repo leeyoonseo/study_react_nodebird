@@ -1,4 +1,16 @@
 node_modules
-.next
 uploads
 public
+
+.env
+
+.next
+.nuxt
+
+.cache
+
+.vuepress/dist
+
+.serverless
+/front/build
+.pem

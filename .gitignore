@@ -13,4 +13,4 @@ public
 
 .serverless
 /front/build
-.pem
+*.pem

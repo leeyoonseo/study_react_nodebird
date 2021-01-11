@@ -8,6 +8,10 @@ const passport = require('passport');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 
+// 보안 (node에서 production server할때는 두개 다 필수)
+const hpp = require('hpp');
+const helmet = require('helmet');
+
 // 라우터 분리
 const postRouter = require('./routes/post');
 
@@ -31,17 +35,27 @@ db.sequelize.sync()
     .catch(console.error);
 passportConfig();
 
-// 서버에 응답, 요청 기록하기
-// 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
-// 디버깅 용이
-app.use(morgan('dev'));
+// 배포 모드와 개발모드 
+if(process.env.NODE_ENV === 'production'){
+    app.use(morgan('combined'));
+
+    // 보안에 도움되는 패키지
+    app.use(hpp());
+    app.use(helmet());
+
+}else{
+    // 서버에 응답, 요청 기록하기
+    // 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
+    // 디버깅 용이
+    app.use(morgan('dev'));
+}
 
 // cors 설정
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
 app.use(cors({
     // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
-    // origin: 'http://localhost:3060',
-    origin: true,
+    origin: ['http://localhost:3060', 'nodebird.com'], // 운영 url
+    // origin: true,
 
     // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
     // 쿠키 전달을 위해 true로 해야함

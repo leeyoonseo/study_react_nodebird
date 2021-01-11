@@ -4,6 +4,8 @@ import { PlusOutlined } from '@ant-design/icons';
 
 import ImagesZoom from './ImagesZoom';
 
+import backUrl from '../config/config';
+
 const PostImages = ({ images }) => {
     const [showImagesZoom, setShowImagesZoom] = useState(false);
 
@@ -22,7 +24,7 @@ const PostImages = ({ images }) => {
         return(
             <>
                 <img 
-                    src={`http://localhost:3065/${images[0].src}`} 
+                    src={`${backUrl}/${images[0].src}`} 
                     alt={images[0].src} 
                     // 클릭은 버튼, input등에 넣는데
                     // img에 클릭을 넣으면 장애인들이 헷갈려함
@@ -41,13 +43,13 @@ const PostImages = ({ images }) => {
             <>
                 <img 
                     style={{ display: 'inline-block', width: '50%' }}
-                    src={`http://localhost:3065/${images[0].src}`} 
+                    src={`${backUrl}/${images[0].src}`} 
                     alt={images[0].src} 
                     onClick={onZoom} 
                 />
                 <img 
                     style={{ display: 'inline-block', width: '50%' }}
-                    src={`http://localhost:3065/${images[1].src}`} 
+                    src={`${backUrl}/${images[1].src}`} 
                     alt={images[1].src} 
                     onClick={onZoom} 
                 />
@@ -61,7 +63,7 @@ const PostImages = ({ images }) => {
             <div>
                 <img 
                     style={{ width: '50%' }}
-                    src={`http://localhost:3065/${images[0].src}`} 
+                    src={`${backUrl}/${images[0].src}`} 
                     alt={images[0].src} 
                     onClick={onZoom} 
                 />

@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import useInput from '../hooks/useInput';
 import { ADD_POST_REQUEST, UPLOAD_IMAGES_REQUEST, REMOVE_IMAGE } from '../reducers/post';
 
+import backUrl from '../config/config';
 
 const PostForm = () => {
     const { imagePaths, addPostDone } = useSelector((state) => state.post);
@@ -115,7 +116,7 @@ const PostForm = () => {
                 {imagePaths.map((v, i) => (
                     <div key={v} style={{ display: 'inline-block' }}>
                         {/* 단순히 이렇게 쓰는게 아니라 express가 uploads 폴더에 접근할 수 있도록 해야함 */}
-                        <img src={`http://localhost:3065/${v}`} style={{ width: '200px' }} alt={v} />
+                        <img src={`${backUrl}/${v}`} style={{ width: '200px' }} alt={v} />
                         <div>
                             <Button onClick={onRemoveImage(i)}>제거</Button>
                         </div>

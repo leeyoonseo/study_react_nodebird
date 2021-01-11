@@ -9,7 +9,7 @@ import { Overlay, Global, Header, CloseButton, ImgWrapper, SlickWrapper, Indicat
 // 캐러셀 구현을 위한 react-slick
 import Slick from 'react-slick';
 
-import backUrl from '../../config/config';
+import { backUrl } from '../../config/config';
 
 const ImagesZoom = ({ images, onClose }) => {
     const [currentSlide, setCurrentSlide] = useState(0);

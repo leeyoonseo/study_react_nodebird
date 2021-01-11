@@ -54,7 +54,7 @@ if(process.env.NODE_ENV === 'production'){
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
 app.use(cors({
     // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
-    origin: ['http://localhost:3060', 'nodebird.com'], // 운영 url
+    origin: ['http://localhost:3060', 'nodebird.com', 'http://54.180.115.143'], // 운영 url
     // origin: true,
 
     // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로

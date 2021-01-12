@@ -13,6 +13,8 @@ import PostCard from '../../components/PostCard';
 import wrapper from '../../store/configureStore';
 import AppLayout from '../../components/AppLayout';
 
+import { backUrl } from '../../config/config';
+
 // 특정 사용자의 게시글만 가져오기
 const User = () => {
     const dispatch = useDispatch();
@@ -49,8 +51,8 @@ const User = () => {
                     <meta name="description" content={`${userInfo.nickname}님의 글`} />
                     <meta property="og:title" content={`${userInfo.nickname}님의 게시글`} />
                     <meta property="og:description" content={`${userInfo.nickname}님의 게시글`} />
-                    <meta property="og:image" content="http://nodebird.com/favicon.png" />
-                    <meta property="og:url" content={`https://nodebird.com/user/${id}`} />
+                    <meta property="og:image" content={`${backUrl}/favicon.png`} />
+                    <meta property="og:url" content={`${backUrl}/user/${id}`} />
                 </Head>
             )}
 

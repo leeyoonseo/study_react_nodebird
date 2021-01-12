@@ -15,6 +15,8 @@ import NicknameEditForm from '../components/NicknameEditForm';
 import FollowList from '../components/FollowList';
 import { LOAD_MY_INFO_REQUEST } from '../reducers/user';
 
+import { backUrl } from '../config/config';
+
 // fetcher를 다른걸로 바꾸면 graphql도 쓸 수 있다고함(??)
 // result.data는 Followers 데이터들이 들어옴
 // fatcher는 유틸같은 모듈로 빼서 swr마다 공유해서 사용, 개조 사용하면 된다고함.
@@ -31,8 +33,8 @@ const Profile = () => {
     // 3) limit 숫자가 증가함에 따라 불필요하게 기존에 불러왔던 데이터까지 불러옴
     // - offset과 limit을 적절히 사용하여 기존 데이터는 캐싱해두고 새로불러오는 데이터만 concat으로 합치면 될듯?
     // - useEffect에 followersData의 id로 비교해서 기존 state에 concat하면 된다고 힌트를 줌....
-    const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher);
-    const { data: followingsData, error: followingError } = useSWR(`http://localhost:3065/user/followings?limit=${followingsLimit}`, fetcher);
+    const { data: followersData, error: followerError } = useSWR(`${backUrl}/user/followers?limit=${followersLimit}`, fetcher);
+    const { data: followingsData, error: followingError } = useSWR(`${backUrl}/user/followings?limit=${followingsLimit}`, fetcher);
     
     const { me } = useSelector((state) => state.user);
 
@@ -92,8 +94,8 @@ export const getServerSideProps = wrapper.getServerSideProps(async (context) => 
     // 3번째 인수로 initialData를 보내면되는데...
     // 아래와 같이 return 데이터를 전달하면... HOME의 인자로 전달할 수 있다. 
     // const Profile = ({data}) => { //... } 이렇게 전달받은 데이터를
-    // const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher);
-    // const { data: followersData, error: followerError } = useSWR(`http://localhost:3065/user/followers?limit=${followersLimit}`, fetcher, data);
+    // const { data: followersData, error: followerError } = useSWR(`${backUrl}/user/followers?limit=${followersLimit}`, fetcher);
+    // const { data: followersData, error: followerError } = useSWR(`${backUrl}/user/followers?limit=${followersLimit}`, fetcher, data);
     // fetcher다음에 세번째 인자로 data를 전달하면 swr도 서버사이드 렌더링이 된다.
     // return { props: { data: 123 } }
 });

@@ -54,7 +54,7 @@ if(process.env.NODE_ENV === 'production'){
 // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
 app.use(cors({
     // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
-    origin: ['http://localhost:3060', 'okayoon.com', 'http://13.125.242.174'], // 운영 url
+    origin: ['http://localhost:3060', 'http://okayoon.com'], // 운영 url
     // origin: true,
 
     // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
@@ -87,6 +87,12 @@ app.use(session({
     // 그래서 꼼꼼히 숨겨둠
     // secret: 'nodebirdsecret',
     secret: process.env.COOKIE_SECRET,
+
+    cookie: {
+        httpOnly: true, // cookie는 자바스크립트로 접근할 수 없게 해야함
+        secure: false, // 나중에 https로 할때는 true로 변경할 것
+        domain: process.env.NODE_ENV === 'production' && '.okayoon.com', // .을 붙여줌으로써 aip사이트와 그냥 사이트 쿠키 공유가 됨
+    },
 }));
 app.use(passport.initialize());
 app.use(passport.session());

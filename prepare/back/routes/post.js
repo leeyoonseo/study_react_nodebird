@@ -8,6 +8,10 @@ const path = require('path');
 // 파일 시스템을 조작할 수 있는 모듈
 const fs = require('fs');
 
+// s3
+const multerS3 = require('multer-s3');
+const AWS = require('aws-sdk');
+
 const { Post, Image, Comment, User, Hashtag } = require('../models');
 const { isLoggedIn } = require('./middlewares');
 
@@ -22,34 +26,26 @@ try {
     fs.mkdirSync('uploads');
 }
 
+// s3
+AWS.config.update({
+    accessKeyId: process.env.S3_ACCESS_KEY_ID,
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    region: 'ap-norheast-2',
+})
+
 // 폼마다 형식이 달라서 multer 미들웨어를 사용해서 라우터마다 별도로...
 // 여기서 이미지를 업로드함
 const upload = multer({
 
-    // 어디에 저장? : 컴퓨터의 하드
-        storage: multer.diskStorage({
+    // s3로 변경
+    storage: multerS3({
+        s3: new AWS.S3(),
+        bucket: 'react-nodebird-ok',
 
-        // 지금은 하드에 저장할건데 나중에는 클라우드에 저장할 것임..
-        // 하드웨어에 저장하면 백엔드 요청이 많을 경우 서버 스케일링 시(복사?) 서버를 복사시마다 이미지가 같이 복사되서 넘어감
-        // 즉 쓸데없는 용량이 문제가 될 수 있다.
-        // 배포 시 s3 대체할 예정
-        destination(req, file, done) {
-            // uploads 파일에 저장할거야
-            done(null, 'uploads');
-        },
-
-        // 파일명을 저장
-        filename(req, file, done) { // 제로초.png
-
-            // 중복되는 파일네임을 체크안해주면 노드는 기본적으로 덮어씌운다고함
-            // 따라서 업로드 시에 파일명 뒤에 언제 업로드했는지 날짜, 시, 초를 넣어준다고함.
-            // file.originalname는 파일명
-            const ext = path.extname(file.originalname); // 확장자 추출(.png)
-
-            // path는 노드에서 제공
-            const basename = path.basename(file.originalname, ext); // 제로초
-            done(null, basename + '_' + new Date().getTime() + ext); // 제로초15184712891.png
-        },
+        // 저장되는 파일이름
+        key(req, file, cb){
+            cb(null, `original/${Date.now()}_${path.basename(file.originalname)}`)
+        }
     }),
 
     // 파일 사이즈 제한.. 서버 공격이 될 수도 있기때문에 용량제한도 필요함
@@ -138,7 +134,7 @@ router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => { 
     //     console.error(error);
     //     next(error);
     // }
-    res.json(req.files.map((v) => v.filename));
+    res.json(req.files.map((v) => v.location));
 });
 
 // postId 파라미터

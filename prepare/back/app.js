@@ -43,24 +43,29 @@ if(process.env.NODE_ENV === 'production'){
     app.use(hpp());
     app.use(helmet());
 
+    // cors 설정
+    // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
+    app.use(cors({
+        // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
+        origin: 'http://okayoon.com', // 운영 url
+
+        // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
+        // 쿠키 전달을 위해 true로 해야함
+        credentials: true,
+    }));
+
 }else{
     // 서버에 응답, 요청 기록하기
     // 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
     // 디버깅 용이
     app.use(morgan('dev'));
+
+    app.use(cors({
+        origin: true,
+        credentials: true,
+    }));
+    
 }
-
-// cors 설정
-// cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
-app.use(cors({
-    // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
-    origin: ['http://localhost:3060', 'http://okayoon.com'], // 운영 url
-    // origin: true,
-
-    // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
-    // 쿠키 전달을 위해 true로 해야함
-    credentials: true,
-}));
 
 // images업로드를 위한.. uploads 폴더 접근...
 // 맨 앞 인자 '/'는 localhost:3065의 /가됨  

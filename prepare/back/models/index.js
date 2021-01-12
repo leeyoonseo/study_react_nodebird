@@ -1,6 +1,4 @@
 const Sequelize = require('sequelize');
-
-// class로 문법이 바뀌었기 때문에 문법이 변경되어야함!!
 const comment = require('./comment');
 const hashtag = require('./hashtag');
 const image = require('./image');
@@ -10,7 +8,6 @@ const user = require('./user');
 const env = process.env.NODE_ENV || 'development';
 const config = require('../config/config')[env];
 const db = {};
-
 
 // Node - mySql 연결. 
 // sequelize는 내부적으로 mysql2 사용 중
@@ -31,7 +28,7 @@ db.User = user;
 // 위에서 db에 5개 모델 등록했하고 아래서 반복돌면서 associate의 관계들을 연결 쭉해주는것임
 Object.keys(db).forEach(modelName => {
     db[modelName].init(sequelize);
-});
+})
 
 Object.keys(db).forEach(modelName => {
     if (db[modelName].associate) {

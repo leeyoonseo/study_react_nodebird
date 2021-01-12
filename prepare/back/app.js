@@ -41,30 +41,18 @@ if(process.env.NODE_ENV === 'production'){
 
     // 보안에 도움되는 패키지
     app.use(hpp());
-    app.use(helmet());
-
-    // cors 설정
-    // cors는 보안정책이므로.. 실무에서는 전체 허용하면 위험... 설정해줘야함
-    app.use(cors({
-        // creadentials로 쿠키공유 시 정확한 주소를 넣거나 true로 하거나
-        origin: 'http://okayoon.com', // 운영 url
-
-        // 브라우저-백엔드간의 로그인이되어도 포스트등록이안되므로
-        // 쿠키 전달을 위해 true로 해야함
-        credentials: true,
-    }));
+  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(cors({
+    origin: 'http://okayoon.com',
+    credentials: true,
+  }));
 
 }else{
-    // 서버에 응답, 요청 기록하기
-    // 프론트- 백 요청을 보낼때 cmd에 로그가 뜸
-    // 디버깅 용이
     app.use(morgan('dev'));
-
-    app.use(cors({
-        origin: true,
-        credentials: true,
-    }));
-    
+  app.use(cors({
+    origin: true,
+    credentials: true,
+  }));
 }
 
 // images업로드를 위한.. uploads 폴더 접근...
@@ -83,20 +71,13 @@ app.use(express.urlencoded({ extended: true }));
 // 쿠키, 세션이 필요한것은 브라우저-서버가 같은 정보를 가지고있어야하기 때문에
 // 실제 정보대신 랜덤한 토큰을 쿠키로 보내줌, 그리고 서버에 값을 저장해서 서로연결됨을 인식함
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(session({
-    saveUninitialized: false,
+app.use(session({saveUninitialized: false,
     resave: false,
-
-    // 쿠키에 랜덤한 문자열을 보내준다햇는데
-    // secret이 해킹당하면 정보가 노출될 수 있음
-    // 그래서 꼼꼼히 숨겨둠
-    // secret: 'nodebirdsecret',
     secret: process.env.COOKIE_SECRET,
-
     cookie: {
-        httpOnly: true, // cookie는 자바스크립트로 접근할 수 없게 해야함
-        secure: false, // 나중에 https로 할때는 true로 변경할 것
-        domain: process.env.NODE_ENV === 'production' && '.okayoon.com', // .을 붙여줌으로써 aip사이트와 그냥 사이트 쿠키 공유가 됨
+      httpOnly: true,
+      secure: false,
+      domain: process.env.NODE_ENV === 'production' && '.okayoon.com'
     },
 }));
 app.use(passport.initialize());

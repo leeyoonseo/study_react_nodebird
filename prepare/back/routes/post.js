@@ -1,14 +1,7 @@
 const express = require('express');
-
-// multer는 app.js에 장착할 수 있으나 보통 라우터에서 장착함
-// 어떤 폼은 하나, 여러개 등등 전송 형식, 타입이 다르기때문에 공통적으로 사용안하는것을 추천
 const multer = require('multer');
 const path = require('path');
-
-// 파일 시스템을 조작할 수 있는 모듈
 const fs = require('fs');
-
-// s3
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
 
@@ -18,322 +11,281 @@ const { isLoggedIn } = require('./middlewares');
 const router = express.Router();
 
 try {
-    // uploads 폴더가 있는지 검사
-    fs.accessSync('uploads');
+  fs.accessSync('uploads');
 } catch (error) {
-    // 폴더가 없으면 생성
-    console.log('uploads 폴더가 없으므로 생성합니다.');
-    fs.mkdirSync('uploads');
+  console.log('uploads 폴더가 없으므로 생성합니다.');
+  fs.mkdirSync('uploads');
 }
 
-// s3
 AWS.config.update({
-    accessKeyId: process.env.S3_ACCESS_KEY_ID,
-    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    region: 'ap-norheast-2',
-})
-
-// 폼마다 형식이 달라서 multer 미들웨어를 사용해서 라우터마다 별도로...
-// 여기서 이미지를 업로드함
+  accessKeyId: process.env.S3_ACCESS_KEY_ID,
+  secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+  region: 'ap-northeast-2',
+});
 const upload = multer({
-
-    // s3로 변경
-    storage: multerS3({
-        s3: new AWS.S3(),
-        bucket: 'react-nodebird-ok',
-
-        // 저장되는 파일이름
-        key(req, file, cb){
-            cb(null, `original/${Date.now()}_${path.basename(file.originalname)}`)
-        }
-    }),
-
-    // 파일 사이즈 제한.. 서버 공격이 될 수도 있기때문에 용량제한도 필요함
-    // 이미지, 동영상은 우리 서버에 안거치는게 좋음.. 
-    // 서버비용 비쌈. 웬만하면 프론트-클라우드로 바로 올리는게 베스트임
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  storage: multerS3({
+    s3: new AWS.S3(),
+    bucket: 'react-nodebird',
+    key(req, file, cb) {
+      cb(null, `original/${Date.now()}_${path.basename(file.originalname)}`)
+    }
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
 });
-
 router.post('/', isLoggedIn, upload.none(), async (req, res, next) => { // POST /post
-    try {
-        const hashtags = req.body.content.match(/#[^\s#]+/g);
-        const post = await Post.create({
-            content: req.body.content,
-            UserId: req.user.id,
-        });
-
-        // [TODO 수정할것] 한번에 중복되는 새로운 해시태그로 등록하는 경우, 중복 갯수만큼 db에 등록됨.
-        if (hashtags) {
-
-            // Hashtag.create만 할 경우 문제가 되는게, 중복되는 Hashtag에 대해서도 db에 계속 생성하게 된다.
-            // 따라서 findOrCreate를 사용한다.
-            const result = await Promise.all(hashtags.map((tag) => Hashtag.findOrCreate({
-            
-                // create와는 다르게 where이 추가됨
-                where: { name: tag.slice(1).toLowerCase() },
-            }))); // [[노드, true], [리액트, true]]
-            
-            await post.addHashtags(result.map((v) => v[0]));
-        }
-
-        if (req.body.image) {
-            if (Array.isArray(req.body.image)) { // 이미지를 여러 개 올리면 image: [제로초.png, 부기초.png]
-
-                // 둘다 promise이기에 아래처럼 처리
-                // db에는 파일 주소만 저장함 (무거워지니..)
-                // 또한 db에 넣으면 캐싱을 못하기에 클라우드에 넣고 cdn 캐싱 적용하고 db에는 파일 접근 주소만 가지고 있다.
-                const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image })));
-                await post.addImages(images);
-            
-            } else { // 이미지를 하나만 올리면 image: 제로초.png
-                const image = await Image.create({ src: req.body.image });
-                await post.addImages(image);
-            }
-        }
-        const fullPost = await Post.findOne({
-            where: { id: post.id },
-            include: [{
-                model: Image,
-            }, {
-                model: Comment,
-                include: [{
-                    model: User, // 댓글 작성자
-                    attributes: ['id', 'nickname'],
-                }],
-            }, {
-                model: User, // 게시글 작성자
-                attributes: ['id', 'nickname'],
-            }, {
-                model: User, // 좋아요 누른 사람
-                // 이것을 넣어야 post.Likers가 생성됨
-                as: 'Likers',
-                attributes: ['id'],
-            }]
-        })
-        res.status(201).json(fullPost);
-    } catch (error) {
-        console.error(error);
-        next(error);
+  try {
+    const hashtags = req.body.content.match(/#[^\s#]+/g);
+    const post = await Post.create({
+      content: req.body.content,
+      UserId: req.user.id,
+    });
+    if (hashtags) {
+      const result = await Promise.all(hashtags.map((tag) => Hashtag.findOrCreate({
+        where: { name: tag.slice(1).toLowerCase() },
+      }))); // [[노드, true], [리액트, true]]
+      await post.addHashtags(result.map((v) => v[0]));
     }
+    if (req.body.image) {
+      if (Array.isArray(req.body.image)) { // 이미지를 여러 개 올리면 image: [제로초.png, 부기초.png]
+        const images = await Promise.all(req.body.image.map((image) => Image.create({ src: image })));
+        await post.addImages(images);
+      } else { // 이미지를 하나만 올리면 image: 제로초.png
+        const image = await Image.create({ src: req.body.image });
+        await post.addImages(image);
+      }
+    }
+    const fullPost = await Post.findOne({
+      where: { id: post.id },
+      include: [{
+        model: Image,
+      }, {
+        model: Comment,
+        include: [{
+          model: User, // 댓글 작성자
+          attributes: ['id', 'nickname'],
+        }],
+      }, {
+        model: User, // 게시글 작성자
+        attributes: ['id', 'nickname'],
+      }, {
+        model: User, // 좋아요 누른 사람
+        as: 'Likers',
+        attributes: ['id'],
+      }]
+    })
+    res.status(201).json(fullPost);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
-// 이미지 업로드 용 라우터 
-// array가 아닌 하나의 이미지일 경우에는 upload.single('image')를 쓰면된다.
-// json, text일 경우에는 upload.none이면된다.
-// file input이 두개이상일 경우에는 upload.fields
-// 참고: https://www.zerocho.com/category/NodeJS/post/5950a6c4f7934c001894ea83
 router.post('/images', isLoggedIn, upload.array('image'), (req, res, next) => { // POST /post/images
-    // console.log(req.files);
-    console.log(req.files);
-
-    // try{
-
-    //어디에 업로드가 되었는지 파일명 전달
-    //     res.json(req.files.map((v) => v.filename));
-    // }catch(error){
-    //     console.error(error);
-    //     next(error);
-    // }
-    res.json(req.files.map((v) => v.location));
+  console.log(req.files);
+  res.json(req.files.map((v) => v.location.replace(/\/original\//, '/thumb/')));
 });
 
-// postId 파라미터
-router.get('/:postId', async (req, res, next) => {
-    try {
-
-        // data: { 
-        //     content: commentText, 
-        //     PostId: post.id, 
-        //     UserId: id 
-        // }
-
-        // 프론트, 브라우저는 믿을게 못되서 철저히 검사해서
-        // 해당 코멘트가 등록한 사용자가 맞는지 검사해야한다.
-        // 다른 게시물에 등록, 삭제 할 수 있기 때문에!!
-        const post = await Post.findOne({
-            where: { id: req.params.postId },
-            include: [{
-                model: User,
-                attributes: ['id', 'nickname'],
-            }, {
-                model: Image,
-            }, {
-                model: Comment,
-                include: [{
-                    model: User,
-                    attributes: ['id', 'nickname'],
-                    order: [['createdAt', 'DESC']],
-                }],
-            }, {
-                model: User, // 좋아요 누른 사람
-                as: 'Likers',
-                attributes: ['id'],
-            }],
-        });
-        res.status(200).json(post);
-    } catch (error) {
-        console.error(error);
-        next(error);
+router.get('/:postId', async (req, res, next) => { // GET /post/1
+  try {
+    const post = await Post.findOne({
+      where: { id: req.params.postId },
+    });
+    if (!post) {
+      return res.status(404).send('존재하지 않는 게시글입니다.');
     }
+    const fullPost = await Post.findOne({
+      where: { id: post.id },
+      include: [{
+        model: Post,
+        as: 'Retweet',
+        include: [{
+          model: User,
+          attributes: ['id', 'nickname'],
+        }, {
+          model: Image,
+        }]
+      }, {
+        model: User,
+        attributes: ['id', 'nickname'],
+      }, {
+        model: User,
+        as: 'Likers',
+        attributes: ['id', 'nickname'],
+      }, {
+        model: Image,
+      }, {
+        model: Comment,
+        include: [{
+          model: User,
+          attributes: ['id', 'nickname'],
+        }],
+      }],
+    })
+    res.status(200).json(fullPost);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 router.post('/:postId/retweet', isLoggedIn, async (req, res, next) => { // POST /post/1/retweet
-    try {
-        const post = await Post.findOne({
-            where: { id: req.params.postId },
-            include: [{
-                model: Post,
-                as: 'Retweet',
-            }],
-        });
-
-        if (!post) {
-            return res.status(403).send('존재하지 않는 게시글입니다.');
-        }
-
-        // 1) 게시자가 본인 글을 리트윗하는 것을 방지
-        // 2) 게시자 글을 남이 리트윗하고 그것을 게시자가 리트윗하는 것 방지
-        if (req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)) {
-            return res.status(403).send('자신의 글은 리트윗할 수 없습니다.');
-        }
-
-        const retweetTargetId = post.RetweetId || post.id;
-        const exPost = await Post.findOne({
-            where: {
-                UserId: req.user.id,
-                RetweetId: retweetTargetId,
-            },
-        });
-
-        if (exPost) {
-            return res.status(403).send('이미 리트윗했습니다.');
-        }
-
-        const retweet = await Post.create({
-            UserId: req.user.id,
-            RetweetId: retweetTargetId,
-
-            // model에서 allowNull:false로 작업했을 경우 content를 무조건 넣어야함
-            content: 'retweet',
-        });
-
-        // include가 복잡해지면 db에서 데이터 요청, 응답 속도가 너무 느려지므로
-        // 라우터를 분리하던가의 작업이 필요..
-        // 예를들어 댓글창을 열때... 코멘트를 가져오는 라우터를 만든다던가...
-        const retweetWithPrevPost = await Post.findOne({
-            where: { id: retweet.id },
-            include: [{
-                model: Post,
-                as: 'Retweet',
-                include: [{
-                    model: User,
-                    attributes: ['id', 'nickname'],
-                }, {
-                    model: Image,
-                }]
-            }, {
-                model: User,
-                attributes: ['id', 'nickname'],
-            }, {
-                model: User, // 좋아요 누른 사람
-                as: 'Likers',
-                attributes: ['id'],
-            }, {
-                model: Image,
-            }, {
-                model: Comment,
-                include: [{
-                    model: User,
-                    attributes: ['id', 'nickname'],
-                }],
-            }],
-        })
-        res.status(201).json(retweetWithPrevPost);
-    
-    } catch (error) {
-        console.error(error);
-        next(error);
+  try {
+    const post = await Post.findOne({
+      where: { id: req.params.postId },
+      include: [{
+        model: Post,
+        as: 'Retweet',
+      }],
+    });
+    if (!post) {
+      return res.status(403).send('존재하지 않는 게시글입니다.');
     }
+    if (req.user.id === post.UserId || (post.Retweet && post.Retweet.UserId === req.user.id)) {
+      return res.status(403).send('자신의 글은 리트윗할 수 없습니다.');
+    }
+    const retweetTargetId = post.RetweetId || post.id;
+    const exPost = await Post.findOne({
+      where: {
+        UserId: req.user.id,
+        RetweetId: retweetTargetId,
+      },
+    });
+    if (exPost) {
+      return res.status(403).send('이미 리트윗했습니다.');
+    }
+    const retweet = await Post.create({
+      UserId: req.user.id,
+      RetweetId: retweetTargetId,
+      content: 'retweet',
+    });
+    const retweetWithPrevPost = await Post.findOne({
+      where: { id: retweet.id },
+      include: [{
+        model: Post,
+        as: 'Retweet',
+        include: [{
+          model: User,
+          attributes: ['id', 'nickname'],
+        }, {
+          model: Image,
+        }]
+      }, {
+        model: User,
+        attributes: ['id', 'nickname'],
+      }, {
+        model: User, // 좋아요 누른 사람
+        as: 'Likers',
+        attributes: ['id'],
+      }, {
+        model: Image,
+      }, {
+        model: Comment,
+        include: [{
+          model: User,
+          attributes: ['id', 'nickname'],
+        }],
+      }],
+    })
+    res.status(201).json(retweetWithPrevPost);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 router.post('/:postId/comment', isLoggedIn, async (req, res, next) => { // POST /post/1/comment
-    try {
-        const post = await Post.findOne({
-            where: { id: req.params.postId },
-        });
-
-        if (!post) {
-            return res.status(403).send('존재하지 않는 게시글입니다.');
-        }
-        
-        const comment = await Comment.create({
-            content: req.body.content,
-            PostId: parseInt(req.params.postId, 10),
-            UserId: req.user.id,
-        })
-
-        const fullComment = await Comment.findOne({
-            where: { id: comment.id },
-            include: [{
-                model: User,
-                attributes: ['id', 'nickname'],
-            }],
-        })
-
-        res.status(201).json(fullComment);
-    } catch (error) {
-        console.error(error);
-        next(error);
+  try {
+    const post = await Post.findOne({
+      where: { id: req.params.postId },
+    });
+    if (!post) {
+      return res.status(403).send('존재하지 않는 게시글입니다.');
     }
+    const comment = await Comment.create({
+      content: req.body.content,
+      PostId: parseInt(req.params.postId, 10),
+      UserId: req.user.id,
+    })
+    const fullComment = await Comment.findOne({
+      where: { id: comment.id },
+      include: [{
+        model: User,
+        attributes: ['id', 'nickname'],
+      }],
+    })
+    res.status(201).json(fullComment);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 router.patch('/:postId/like', isLoggedIn, async (req, res, next) => { // PATCH /post/1/like
-    try {
-        const post = await Post.findOne({ where: { id: req.params.postId }});
-        if (!post) {
-            return res.status(403).send('게시글이 존재하지 않습니다.');
-        }
-
-        // 모델에서 belongsToMany as...썼을때 
-        // 이때 Post.addLikes 같은 관계 메서드가 자동으로 생긴다.(sequelize에서)
-        await post.addLikers(req.user.id);
-        res.json({ PostId: post.id, UserId: req.user.id });
-    } catch (error) {
-        console.error(error);
-        next(error);
+  try {
+    const post = await Post.findOne({ where: { id: req.params.postId }});
+    if (!post) {
+      return res.status(403).send('게시글이 존재하지 않습니다.');
     }
+    await post.addLikers(req.user.id);
+    res.json({ PostId: post.id, UserId: req.user.id });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 router.delete('/:postId/like', isLoggedIn, async (req, res, next) => { // DELETE /post/1/like
-    try {
-        const post = await Post.findOne({ where: { id: req.params.postId }});
-        if (!post) {
-            return res.status(403).send('게시글이 존재하지 않습니다.');
-        }
-
-        // mysql로도 할수있으니 공식문서보도록
-        await post.removeLikers(req.user.id);
-        res.json({ PostId: post.id, UserId: req.user.id });
-    } catch (error) {
-        console.error(error);
-        next(error);
+  try {
+    const post = await Post.findOne({ where: { id: req.params.postId }});
+    if (!post) {
+      return res.status(403).send('게시글이 존재하지 않습니다.');
     }
+    await post.removeLikers(req.user.id);
+    res.json({ PostId: post.id, UserId: req.user.id });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
+
+router.patch('/:postId', isLoggedIn, async (req, res, next) => { // PATCH /post/10
+  const hashtags = req.body.content.match(/#[^\s#]+/g);
+  try {
+    await Post.update({
+      content: req.body.content
+    }, {
+      where: {
+        id: req.params.postId,
+        UserId: req.user.id,
+      },
+    });
+    const post = await Post.findOne({ where: { id: req.params.postId }});
+    if (hashtags) {
+      const result = await Promise.all(hashtags.map((tag) => Hashtag.findOrCreate({
+        where: { name: tag.slice(1).toLowerCase() },
+      }))); // [[노드, true], [리액트, true]]
+      await post.setHashtags(result.map((v) => v[0]));
+    }
+    res.status(200).json({ PostId: parseInt(req.params.postId, 10), content: req.body.content });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 router.delete('/:postId', isLoggedIn, async (req, res, next) => { // DELETE /post/10
-    try {
-        await Post.destroy({
-            where: {
-                id: req.params.postId,
-                // 삭제 시 보안을 철저히 (내가 등록한 게시글만 지우도록)
-                UserId: req.user.id,
-            },
-        });
-        res.status(200).json({ PostId: parseInt(req.params.postId, 10) });
-    } catch (error) {
-        console.error(error);
-        next(error);
-    }
+  try {
+    await Post.destroy({
+      where: {
+        id: req.params.postId,
+        UserId: req.user.id,
+      },
+    });
+    res.status(200).json({ PostId: parseInt(req.params.postId, 10) });
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
 });
 
 module.exports = router;
